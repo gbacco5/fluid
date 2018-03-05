@@ -1,0 +1,35 @@
+\documentclass[b5paper,11pt,oneside,fleqn]{article}
+\usepackage{amsmath,amsthm,amssymb}
+
+\usepackage{geometry}
+
+\title{\raggedleft\sffamily\Huge fluid}
+\author{\sffamily\itshape Bacco, Giacomo}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Flow past a cylinder}
+
+Let $ \rho_0 $ be the radius of the cylinder, $ \rho,\xi $ the polar coordinate 
+system in use.
+One possible solution of this problem have these potential and streamline 
+functions:
+\begin{align}
+\phi(\rho,\xi) &= \left( \rho + \frac{\rho_0^2}{\rho} \right) \cos\xi \\[1ex]
+\psi(\rho,\xi) &= \left( \rho - \frac{\rho_0^2}{\rho} \right) \sin\xi 
+\end{align}
+Although these equations are deeply coupled, the radius $ \rho $ and the phase 
+$ \xi $ can be obtained as a function of the other quantities.
+For our purposes, we use $ \psi $.
+\begin{align}
+\rho(\psi,\xi) &= \frac{\psi + \sqrt{\psi^2 + 4\rho_0^2 \sin^2\xi}}{2\sin\xi} 
+\\[1ex]
+\xi(\psi,\rho) &= \arcsin \left( \frac{\rho\, \psi}{\rho^2 - \rho_0^2} \right)  
+\end{align}
+
+
+
+
+\end{document}
