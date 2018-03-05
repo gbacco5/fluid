@@ -18,7 +18,7 @@ Synchronous Reluctance Rotor with *fluid* flux-barriers.
 Matlab or Octave to compute the points. 
 The points calculation is general, so it could be implemented in any
 language, but I chose Matlab/Octave because it is my standard 
-interface with [FEMM](www.femm.info) software.
+interface with [FEMM](http://www.femm.info) software.
 
 If you do not use FEMM, you can still use the calculation part and
 make a porting for your CAD engine or FEA software.
