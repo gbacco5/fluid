@@ -7,6 +7,9 @@
 \author{\sffamily\itshape Bacco, Giacomo}
 \date{}
 
+\newcommand{\eu}{\mathrm{e}}
+\newcommand{\je}{\mathrm{j}}
+
 \begin{document}
 \maketitle
 
@@ -28,6 +31,41 @@ For our purposes, we use $ \psi $.
 \\[1ex]
 \xi(\psi,\rho) &= \arcsin \left( \frac{\rho\, \psi}{\rho^2 - \rho_0^2} \right)  
 \end{align}
+
+
+
+\section{Conformal mapping}
+From the reference plane, which is equivalent to a two-pole machine,
+we use a complex map to obtain the quantities in the actual plane.
+Let $ p $ be the number of pole pairs. Then:
+\begin{equation}
+\begin{aligned}
+\zeta              &\xrightarrow{\;\mathcal{M}\;} z = \sqrt[p]{\zeta} \\
+\rho\,\eu^{\je\xi} &\xrightarrow{\;\mathcal{M}\;}
+                       r \, \eu^{\je\vartheta} = \sqrt[p]{\rho}\,\eu^{\je 
+                       \xi/p} \\
+\chi + \je\eta     &\xrightarrow{\;\mathcal{M}\;} x + \je y 
+\end{aligned}
+\end{equation}
+%
+It is easy to find the inverse map:
+\begin{equation}
+\mathcal{M}\colon \sqrt[p]{\cdot} \qquad 
+\mathcal{M}^{-1}\colon (.)^p
+\end{equation}
+
+
+
+\section{Computation of flux-barrier base points}
+Let the flux-barrier and flux-carrier thicknesses be given.
+Then the base points for the flux-barriers can be computed easily.
+
+
+
+
+
+
+
 
 
 
