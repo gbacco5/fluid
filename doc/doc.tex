@@ -10,6 +10,10 @@
 \newcommand{\eu}{\mathrm{e}}
 \newcommand{\je}{\mathrm{j}}
 
+\newcommand{\ped}[1]{_\textup{#1}}
+\newcommand{\ap}[1]{^\textup{#1}}
+\newcommand{\trib}[1][]{t\ped{rib#1}}
+
 \begin{document}
 \maketitle
 
@@ -63,6 +67,31 @@ Then the base points for the flux-barriers can be computed easily.
 
 
 
+
+\subsection{Magnet insertion}
+\[
+\trib = \trib + w\ped{m}
+\]
+where $ w\ped{m} $ is the magnet width.
+
+
+\subsection{Central base points}
+The line describing the $ q $-axis is
+\begin{equation}
+\begin{aligned}
+y &= m x + q \\
+m &= \tan\frac{\pi}{2p} \\
+q &= \frac{\trib}{\cos\frac{\pi}{2p}}
+\end{aligned}
+\end{equation}
+
+\begin{equation}
+\begin{cases}
+y_c - m x_c - q = 0 \\
+x_c - r_c(\psi_c,\theta_c) \cos\theta_c = 0 \\
+y_c - r_c(\psi_c,\theta_c) \sin\theta_c = 0 \\
+\end{cases}
+\end{equation}
 
 
 
