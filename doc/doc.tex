@@ -2,6 +2,7 @@
 \usepackage{amsmath,amsthm,amssymb}
 
 \usepackage{geometry}
+\usepackage{xifthen}
 
 \title{\raggedleft\sffamily\Huge fluid}
 \author{\sffamily\itshape Bacco, Giacomo}
@@ -12,10 +13,56 @@
 
 \newcommand{\ped}[1]{_\textup{#1}}
 \newcommand{\ap}[1]{^\textup{#1}}
-\newcommand{\trib}[1][]{t\ped{rib#1}}
+\newcommand{\pt}[1]{\mathsf{#1}}
+\newcommand{\te}{\vartheta}
+
+% magnet width
+\newcommand{\wm}[1][]{%
+w_{\textup{m}
+\ifthenelse{\isempty{#1}{}}{}{,#1}%
+}}
+% flux-carrier width
+\newcommand{\wc}[1][]{%
+w_{\textup{c}
+\ifthenelse{\isempty{#1}{}}{}{,#1}%
+}}
+% flux-barrier thickness
+\newcommand{\tb}[1][]{%
+t_{\textup{c}
+\ifthenelse{\isempty{#1}{}}{}{,#1}%
+}}
+% iron rib width
+\newcommand{\wrib}[1][]{%
+w_{\textup{rib}
+\ifthenelse{\isempty{#1}{}}{}{,#1}%
+}}
+% tangential iron rib width
+\newcommand{\wribt}{\wrib[\text{t}]}
+\newcommand{\xth}[1]{$ #1 $-th}
+% flux-barrier angle
+\newcommand{\ab}[1][]{%
+\alpha_{\textup{b}
+\ifthenelse{\isempty{#1}{}}{}{,#1}%
+}}
+
+\newcommand{\pih}[1][]{\tfrac{\pi}{2#1}}
+
+\usepackage{url}
+\usepackage{hyperref}
 
 \begin{document}
 \maketitle
+
+
+\section*{Citing}
+Please cite this work if you have used it in your project or in your program.
+\vspace{0\baselineskip}
+
+{\small\noindent%
+Giacomo Bacco, \emph{fluid: Free Fluid Barriers Rotor for Synchronous 
+Reluctance Motor Drawing}, GitHub, 2018, available at: 
+\url{https://github.com/gbacco5/fluid}
+}
 
 \section{Flow past a cylinder}
 
@@ -46,7 +93,7 @@ Let $ p $ be the number of pole pairs. Then:
 \begin{aligned}
 \zeta              &\xrightarrow{\;\mathcal{M}\;} z = \sqrt[p]{\zeta} \\
 \rho\,\eu^{\je\xi} &\xrightarrow{\;\mathcal{M}\;}
-                       r \, \eu^{\je\vartheta} = \sqrt[p]{\rho}\,\eu^{\je 
+                       r \, \eu^{\je\te} = \sqrt[p]{\rho}\,\eu^{\je 
                        \xi/p} \\
 \chi + \je\eta     &\xrightarrow{\;\mathcal{M}\;} x + \je y 
 \end{aligned}
@@ -63,35 +110,108 @@ It is easy to find the inverse map:
 \section{Computation of flux-barrier base points}
 Let the flux-barrier and flux-carrier thicknesses be given.
 Then the base points for the flux-barriers can be computed easily.
+Let
+$ D\ped{r} $ be the rotor outer diameter,
+$ \wribt $ the tangential iron rib width,
+$ \wc[k] $ the \xth{k} flux-carrier width, 
+and $ \tb[k] $ the \xth{k} flux-barrier thickness.%
+\footnote{%
+You may wonder why the main dimensions of the flux-carrier and 
+flux-barrier differ in the name (width versus thickness).
+This is due to a choice of mine,
+because I prefer to refer to width when the flux flows perpendicularly to the 
+dimension, 
+and to thickness when it flows in parallel.%
+}
+%
+Then
+\begin{equation}
+\begin{aligned}
+R\ped{r} &= \frac{D\ped{r}}{2} - \wribt \\
+R_\pt{A_1} &= R\ped{r} - \wc[1] \\
+R_\pt{B_1} &= R_\pt{A_1} - \tb[1] \\
+    &\:\:\,\vdots 
+\end{aligned}
+\end{equation}
+%
+So, in general:
+\begin{equation}
+\begin{aligned}
+R_\pt{A_k} &= R_\pt{B_{k-1}} - \wc[k] \\
+R_\pt{B_k} &= R_\pt{A_{k-1}} - \tb[k] 
+\end{aligned}
+\end{equation}
+with the exception $ R_\pt{B_0} = R\ped{r} $.
 
-
+Now we know both the radii and the angle -- always $ \pi/(2p) $ -- of the 
+flux-barrier internal points. So we can compute their respective streamline 
+value.
 
 
 
 \subsection{Magnet insertion}
 \[
-\trib = \trib + w\ped{m}
+\wrib[k] = \wrib[k] + \wm[k]
 \]
-where $ w\ped{m} $ is the magnet width.
+where $ \wm[k] $ is the \xth{k} magnet width.
 
 
 \subsection{Central base points}
+We refer to points $ \pt{A} $ and $ \pt{B} $.
+
 The line describing the $ q $-axis is
 \begin{equation}
 \begin{aligned}
 y &= m x + q \\
 m &= \tan\frac{\pi}{2p} \\
-q &= \frac{\trib}{\cos\frac{\pi}{2p}}
+q &= \frac{\wrib}{\cos\frac{\pi}{2p}}
 \end{aligned}
 \end{equation}
 
 \begin{equation}
 \begin{cases}
-y_c - m x_c - q = 0 \\
-x_c - r_c(\psi_c,\theta_c) \cos\theta_c = 0 \\
-y_c - r_c(\psi_c,\theta_c) \sin\theta_c = 0 \\
+y_\pt{A'} - m x_\pt{A'} - q = 0 \\
+x_\pt{A'} - r_\pt{A'}(\psi_\pt{A},\te_\pt{A'}) \cos\te_\pt{A'} = 0 \\
+y_\pt{A'} - r_\pt{A'}(\psi_\pt{A},\te_\pt{A'}) \sin\te_\pt{A'} = 0 \\
 \end{cases}
 \end{equation}
+where $ \te_\pt{A} $ is used as the third degree of freedom and $ r_\pt{A} $ is 
+then a function of it.
+The solution of such system can be determined solving the single equation
+\begin{equation}
+r_\pt{A'}(\psi_\pt{A},\te_\pt{A'})
+\bigl( \sin\te_\pt{A'} - m \cos\te_\pt{A'} \bigr) - q = 0
+\end{equation}
+in the unknown $ \te_\pt{A'} $.
+
+The same equation can be written for point $ \pt{B} $ with the proper 
+substitution and repeated for all the flux-barriers.
+
+
+
+\section{Outer base points}
+We refer to points $ \pt{C} $, $ \pt{D} $, and $ E $.
+If the flux-barrier angle, $ \ab $, is given, then
+\begin{equation}
+\begin{aligned}
+x_\pt{E} &= R_r \cos(\pih[p] - \ab) \\
+y_\pt{E} &= R_r \sin(\pih[p] - \ab)
+\end{aligned}
+\end{equation}
+
+Points $ \pt{C} $ and $ \pt{D} $ results from the connection of the 
+flux-barrier sideline and point $ \pt{E} $.
+This connection should be as smooth as possible in order to 
+avoid dangerous mechanical stress concentrations.
+We are going to use circular arcs to make this connection.
+So we impose the tangency between the flux-barrier sideline and the arc, 
+between the arc and the radius through point $ \pt{E} $.
+
+
+
+
+
+
 
 
 
