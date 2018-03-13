@@ -24,7 +24,7 @@ barrier_angles_el = [14,26,38]*2; % [deg], electrical flux-barrier angles
 barrier_angles = barrier_angles_el/p; % [deg], flux-barrier angles
 
 % wm = []
-wrib = [1,2,3]*mm; % [m], radial iron rib widths
+wrib = [1,5,10]*mm; % [m], radial iron rib widths
 
 
 %% IMPLICIT FUNCTIONS
@@ -38,6 +38,12 @@ r_map = @(rho) rho.^(1/p);
 th_map = @(xi) xi./p;
 rho_map = @(r) r.^p;
 xi_map = @(th) th.*p;
+
+vr = @(r,th,R0) p*(r.^(p-1) - R0^(2*p)./r.^(p+1)).*cos(p*th);
+vt = @(r,th,R0) -p*(r.^(p-1) + R0^(2*p)./r.^(p+1)).*sin(p*th);
+vx = @(vr_v,vth_v,th) vr_v.*cos(th) - vth_v.*sin(th);
+vy = @(vr_v,vth_v,th) vr_v.*sin(th) + vth_v.*cos(th);
+
 
 
 %% Precomputations
@@ -55,6 +61,8 @@ qCentral = repmat( -wrib/2/cos(te_qAxis), 1, 2); % intercept
 psiCentralPtA = psi_fluid(rho_map(RA), xi_map(te_qAxis), rho0);
 psiCentralPtB = psi_fluid(rho_map(RB), xi_map(te_qAxis), rho0);
 psiCentralPt = [psiCentralPtA, psiCentralPtB];
+psiA = psiCentralPtA;
+psiB = psiCentralPtB;
 
 CentralPt_Eq = @(th) ...
   r_map( rho_fluid(psiCentralPt, th, rho0) ).*...
@@ -72,9 +80,62 @@ teAprime = teABprime(1:Nb);
 teBprime = teABprime(Nb+1:end);
 
 
+%% Outer base points C (top)
+aph_b = barrier_angles*pi/180;
+te_b = pi/2/p - aph_b;
+xb = Dend/2*cos(te_b);
+yb = Dend/2*sin(te_b);
+
+options.Algorithm = 'trust-region-dogleg'; % non-square systems
+
+BarrierEndSystem = @(th,xd,yd,xo,yo,R) ...
+  [xd - r_map(rho_fluid(psiA', p*th, rho0)).*cos( th )
+   yd - r_map(rho_fluid(psiA', p*th, rho0)).*sin( th )
+  (xd - xo).^2 + (yd - yo).^2 - R.^2
+  (xb' - xo).^2 + (yb' - yo).^2 - R.^2
+  (xo - xd).*vx( vr( r_map(rho_fluid(psiA', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiA', p*th, rho0)) ,th,R0 ), th) + (yo - yd).*vy(  vr( r_map(rho_fluid(psiA', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiA', p*th, rho0)) ,th,R0 ), th)
+  (xo - xb').*yb' - (yo - yb').*xb'
+%   th - xi_fluid((rho_fluid(p*th, psi_d, rho0)), psi_d, rho0)/p % serve?
+  ];
+
+X0 = [ te_b', 0*xb', 0*yb', 0*xb', 0*yb', 0*xb'];
+% X0 = [ aph_b, 0, 0, 0, 0, 0];
+X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
+
+xOC = X(:,4);
+yOC = X(:,5);
+xC = X(:,2);
+yC = X(:,3);
 
 
-% plot
+%% Outer base points D (bottom)
+aph_b = barrier_angles*pi/180;
+te_b = pi/2/p - aph_b;
+xb = Dend/2*cos(te_b);
+yb = Dend/2*sin(te_b);
+
+options.Algorithm = 'levenberg-marquardt'; % non-square systems
+
+BarrierEndSystem = @(th,xd,yd,xo,yo,R) ...
+  [xd - r_map(rho_fluid(psiB', p*th, rho0)).*cos( th )
+   yd - r_map(rho_fluid(psiB', p*th, rho0)).*sin( th )
+  (xd - xo).^2 + (yd - yo).^2 - R.^2
+  (xb' - xo).^2 + (yb' - yo).^2 - R.^2
+  (xo - xd).*vx( vr( r_map(rho_fluid(psiB', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiB', p*th, rho0)) ,th,R0 ), th) + (yo - yd).*vy(  vr( r_map(rho_fluid(psiB', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiB', p*th, rho0)) ,th,R0 ), th)
+  (xo - xb').*yb' - (yo - yb').*xb'
+%   th - xi_fluid((rho_fluid(p*th, psi_d, rho0)), psi_d, rho0)/p % serve?
+  ];
+
+X0 = [ te_b', xb', .8*yb', xb'*.9, yb'*.9, xb'*.1];
+X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
+
+xOD = X(:,4);
+yOD = X(:,5);
+xD = X(:,2);
+yD = X(:,3);
+
+
+%% plot
 % % draw the rotor
 figure
 hold on
@@ -86,11 +147,13 @@ axis equal
 plot(RA.*exp(j*teAprime), 'rd')
 plot(RB.*exp(j*teBprime), 'bo')
 
-aph_b = barrier_angles*pi/180;
-te_b = pi/2/p - aph_b;
-xb = Dend/2*cos(te_b);
-yb = Dend/2*sin(te_b);
 plot(xb, yb,'ko')
+
+plot(xOC, yOC,'go')
+plot(xC, yC,'ro')
+plot(xOD, yOD,'co')
+plot(xD, yD,'bo')
+
 % 
 % 
 % 
