@@ -4,7 +4,7 @@
 % Bacco, Giacomo 2018
 
 clear all; close all; clc;
-addpath('./tools')
+addpath(genpath('./'))
 
 
 %% DATA
