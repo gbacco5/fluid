@@ -30,10 +30,9 @@ barrier = calc_fluid_barrier(rotor);
 figure
 hold all
 axis equal
-plot(barrier(1).X, barrier(1).Y, '.-')
-plot(barrier(2).X, barrier(2).Y, '.-')
-plot(barrier(3).X, barrier(3).Y, '.-')
-
+for bkk = 1:rotor.Nb
+  plot(barrier(bkk).X, barrier(bkk).Y, '.-')
+end
 
 %% FEMM drawing
 
