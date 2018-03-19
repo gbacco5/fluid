@@ -1,5 +1,5 @@
 % FLUID
-% Free Fluid Barriers Rotor for Synchronous Reluctance Motor Drawing
+% Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 %
 % Bacco, Giacomo 2018
 

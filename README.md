@@ -1,6 +1,6 @@
 # fluid
 
-Free Fluid Barriers Rotor for Synchronous Reluctance Motor Drawing
+Free Fluid FLux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 
 `SynRM`, `SyRM`, `SynchRM`, `REL`, `SynchRel`,
 `PMASynRM`, `PMASyRM`, `PMASynchRM`, `PMAREL`, `PMASynchRel`
