@@ -1,6 +1,6 @@
 # fluid
 
-Free Fluid FLux-Barriers Rotor for Synchronous Reluctance Motor Drawing
+Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 
 `SynRM`, `SyRM`, `SynchRM`, `REL`, `SynchRel`,
 `PMASynRM`, `PMASyRM`, `PMASynchRM`, `PMAREL`, `PMASynchRel`
@@ -29,4 +29,6 @@ interface scripting.
 
 ## ETA
 
-Weeks or months, starting March 2018.
+Already shipped! The documentation is not ready, though.
+
+~~Weeks or months, starting March 2018.~~
