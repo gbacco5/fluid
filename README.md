@@ -2,6 +2,8 @@
 
 Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 
+<img src="doc/gfx/3b.png" width="256">
+
 `SynRM`, `SyRM`, `SynchRM`, `REL`, `SynchRel`,
 `PMASynRM`, `PMASyRM`, `PMASynchRM`, `PMAREL`, `PMASynchRel`
 
