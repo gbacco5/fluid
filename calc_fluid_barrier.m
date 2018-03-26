@@ -27,7 +27,11 @@ Dend = Dr - 2*wrib_t; % [m], flux-barrier end diameter
 Dsh = Dend - 2*( sum(tb) + sum(wc) ); % [m], shaft diameter
 R0 = Dsh/2; % [m], shaft radius
 barrier_angles = barrier_angles_el/p; % [deg], flux-barrier angles
-barrier_end = r.barrier_end;
+if isfield(r,'barrier_end')
+  barrier_end = r.barrier_end;
+else
+  barrier_end = '';
+end
 
 
 %% IMPLICIT FUNCTIONS
@@ -285,6 +289,7 @@ if deb
     
     plot(barrier(bkk).X, barrier(bkk).Y, '.-')
   end
+  pause(1e-3)
   
 end
 

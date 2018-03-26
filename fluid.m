@@ -18,7 +18,7 @@ rotor.Nstep = [2, 4, 6]; % number of steps to draw the flux-barrier side
 rotor.De = 200*mm; % [m], rotor outer diameter
 rotor.wrib_t = 1*mm; % [m], tangential iron rib width
 rotor.barrier_angles_el = [14,26,38]*2; % [deg], electrical flux-barrier angles
-rotor.barrier_end = 'rect'; % choose 'rect' or comment
+ rotor.barrier_end = 'rect'; % choose 'rect' or comment
 
 rotor.wrib = [1,2,4]*mm; % [m], radial iron rib widths
 
