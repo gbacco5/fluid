@@ -18,8 +18,17 @@ for bkk = 1:length(b)
   
   mi_drawpolyline([X, Y])
   
-  mi_draw_arc(xE,yE, xEOC,yEOC, xC,yC, 1)
-  mi_draw_arc(xD,yD, xDOE,yDOE, xE,yE, 1)
+  if xEOC == xC && yEOC == yC
+    mi_drawline(xE,yE, xC,yC)
+  else
+    mi_draw_arc(xE,yE, xEOC,yEOC, xC,yC, 1)
+  end
+  
+  if xDOE == xD && yDOE == yD
+    mi_drawline(xD,yD, xE,yE)
+  else
+    mi_draw_arc(xD,yD, xDOE,yDOE, xE,yE, 1)
+  end
   
 end
 

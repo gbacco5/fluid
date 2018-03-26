@@ -27,6 +27,7 @@ Dend = Dr - 2*wrib_t; % [m], flux-barrier end diameter
 Dsh = Dend - 2*( sum(tb) + sum(wc) ); % [m], shaft diameter
 R0 = Dsh/2; % [m], shaft radius
 barrier_angles = barrier_angles_el/p; % [deg], flux-barrier angles
+barrier_end = r.barrier_end;
 
 
 %% IMPLICIT FUNCTIONS
@@ -89,29 +90,37 @@ teE = pi/2/p - aphE;
 xE = Dend/2*cos(teE);
 yE = Dend/2*sin(teE);
 
-options.Algorithm = 'trust-region-dogleg'; % non-square systems
-
-BarrierEndSystem = @(th,xd,yd,xo,yo,R) ...
-  [xd - r_map(rho_fluid(psiA', p*th, rho0)).*cos( th )
-  yd - r_map(rho_fluid(psiA', p*th, rho0)).*sin( th )
-  (xd - xo).^2 + (yd - yo).^2 - R.^2
-  (xE' - xo).^2 + (yE' - yo).^2 - R.^2
-  (xo - xd).*vx( vr( r_map(rho_fluid(psiA', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiA', p*th, rho0)) ,th,R0 ), th) + (yo - yd).*vy(  vr( r_map(rho_fluid(psiA', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiA', p*th, rho0)) ,th,R0 ), th)
-  (xo - xE').*yE' - (yo - yE').*xE'
-  %   th - xi_fluid((rho_fluid(p*th, psiA', rho0)), psiA', rho0)/p % serve?
-  ];
-
-X0 = [ teE', 0*xE', 0*yE', 0*xE', 0*yE', 0*xE'];
-% X0 = [ aph_b, 0, 0, 0, 0, 0];
-X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
-
-xOC = X(:,4)';
-yOC = X(:,5)';
-xC = X(:,2)';
-yC = X(:,3)';
-RC = hypot(xC, yC);
-teC = atan2(yC, xC);
-
+if strcmp(barrier_end, 'rect')
+  RC = Dend/2;
+  teC = th_map( xi_fluid(psiA, rho_map(RC), rho0) );
+  xC = Dend/2*cos(teC);
+  yC = Dend/2*sin(teC);
+  xOC = xC;
+  yOC = yC;
+else
+  options.Algorithm = 'trust-region-dogleg'; % non-square systems
+  
+  BarrierEndSystem = @(th,xd,yd,xo,yo,R) ...
+    [xd - r_map(rho_fluid(psiA', p*th, rho0)).*cos( th )
+    yd - r_map(rho_fluid(psiA', p*th, rho0)).*sin( th )
+    (xd - xo).^2 + (yd - yo).^2 - R.^2
+    (xE' - xo).^2 + (yE' - yo).^2 - R.^2
+    (xo - xd).*vx( vr( r_map(rho_fluid(psiA', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiA', p*th, rho0)) ,th,R0 ), th) + (yo - yd).*vy(  vr( r_map(rho_fluid(psiA', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiA', p*th, rho0)) ,th,R0 ), th)
+    (xo - xE').*yE' - (yo - yE').*xE'
+    %   th - xi_fluid((rho_fluid(p*th, psiA', rho0)), psiA', rho0)/p % serve?
+    ];
+  
+  X0 = [ teE', 0*xE', 0*yE', 0*xE', 0*yE', 0*xE'];
+  % X0 = [ aph_b, 0, 0, 0, 0, 0];
+  X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
+  
+  xOC = X(:,4)';
+  yOC = X(:,5)';
+  xC = X(:,2)';
+  yC = X(:,3)';
+  RC = hypot(xC, yC);
+  teC = atan2(yC, xC);
+end
 
 %% Outer base points D (bottom)
 aphE = barrier_angles*pi/180;
@@ -119,28 +128,36 @@ teE = pi/2/p - aphE;
 xE = Dend/2*cos(teE);
 yE = Dend/2*sin(teE);
 
-options.Algorithm = 'levenberg-marquardt'; % non-square systems
-
-BarrierEndSystem = @(th,xd,yd,xo,yo,R) ...
-  [xd - r_map(rho_fluid(psiB', p*th, rho0)).*cos( th )
-  yd - r_map(rho_fluid(psiB', p*th, rho0)).*sin( th )
-  (xd - xo).^2 + (yd - yo).^2 - R.^2
-  (xE' - xo).^2 + (yE' - yo).^2 - R.^2
-  (xo - xd).*vx( vr( r_map(rho_fluid(psiB', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiB', p*th, rho0)) ,th,R0 ), th) + (yo - yd).*vy(  vr( r_map(rho_fluid(psiB', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiB', p*th, rho0)) ,th,R0 ), th)
-  (xo - xE').*yE' - (yo - yE').*xE'
-  %   th - xi_fluid((rho_fluid(p*th, psi_d, rho0)), psi_d, rho0)/p % serve?
-  ];
-
-X0 = [ teE', xE', .8*yE', xE'*.9, yE'*.9, xE'*.1];
-X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
-
-xOD = X(:,4)';
-yOD = X(:,5)';
-xD = X(:,2)';
-yD = X(:,3)';
-RD = hypot(xD, yD);
-teD = atan2(yD, xD);
-
+if strcmp(barrier_end, 'rect')
+  RD = Dend/2;
+  teD = th_map( xi_fluid(psiB, rho_map(RD), rho0) );
+  xD = Dend/2*cos(teD);
+  yD = Dend/2*sin(teD);
+  xOD = xD;
+  yOD = yD;
+else
+  options.Algorithm = 'levenberg-marquardt'; % non-square systems
+  
+  BarrierEndSystem = @(th,xd,yd,xo,yo,R) ...
+    [xd - r_map(rho_fluid(psiB', p*th, rho0)).*cos( th )
+    yd - r_map(rho_fluid(psiB', p*th, rho0)).*sin( th )
+    (xd - xo).^2 + (yd - yo).^2 - R.^2
+    (xE' - xo).^2 + (yE' - yo).^2 - R.^2
+    (xo - xd).*vx( vr( r_map(rho_fluid(psiB', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiB', p*th, rho0)) ,th,R0 ), th) + (yo - yd).*vy(  vr( r_map(rho_fluid(psiB', p*th, rho0)),th,R0 ), vt( r_map(rho_fluid(psiB', p*th, rho0)) ,th,R0 ), th)
+    (xo - xE').*yE' - (yo - yE').*xE'
+    %   th - xi_fluid((rho_fluid(p*th, psi_d, rho0)), psi_d, rho0)/p % serve?
+    ];
+  
+  X0 = [ teE', xE', .8*yE', xE'*.9, yE'*.9, xE'*.1];
+  X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
+  
+  xOD = X(:,4)';
+  yOD = X(:,5)';
+  xD = X(:,2)';
+  yD = X(:,3)';
+  RD = hypot(xD, yD);
+  teD = atan2(yD, xD);
+end
 
 %% Flux-barrier points
 % We already have the potentials of the two flux-barrier sidelines
