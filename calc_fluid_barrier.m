@@ -6,21 +6,33 @@ function barrier = calc_fluid_barrier(r)
 %% DATA
 global deb
 
+Dr = r.De; % [m], rotor outer diameter
+ScalingFactor = 1/( 10^(round(log10(Dr))) );
+% ScalingFactor = 1;
+Dr = Dr*ScalingFactor;
+
 p = r.p; % number of pole pairs
 Nb = r.Nb; % number of flux-barriers
-tb = r.tb; % flux-barrier widths
-wc = r.wc; % flux-carrier widths
+tb = r.tb*ScalingFactor; % flux-barrier widths
+wc = r.wc*ScalingFactor; % flux-carrier widths
 Nstep = r.Nstep; % number of steps to draw the flux-barrier side
 
-Dr = r.De; % [m], rotor outer diameter
-wrib_t = r.wrib_t; % [m], tangential iron rib width
-barrier_angles_el = r.barrier_angles_el; % [deg], electrical flux-barrier angles
+wrib_t = r.wrib_t*ScalingFactor; % [m], tangential iron rib width
+
+if isfield(r,'barrier_angles_el')
+  barrier_angles_el = r.barrier_angles_el; % [deg], electrical flux-barrier angles
+  AutoBarrierEndCalc = 0;
+else
+  barrier_angles_el = zeros(1,Nb);
+  AutoBarrierEndCalc = 1;
+end
+
 if isfield(r,'wm')
-  wm = r.wm;
+  wm = r.wm*ScalingFactor;
 else
   wm = 0;
 end
-wrib = r.wrib + wm; % [m], radial iron rib widths
+wrib = r.wrib*ScalingFactor + wm; % [m], radial iron rib widths
 
 
 Dend = Dr - 2*wrib_t; % [m], flux-barrier end diameter
@@ -74,7 +86,11 @@ CentralPt_Eq = @(th) ...
   r_map( rho_fluid(psiCentralPt, th, rho0) ).*...
   ( sin(th) - mCentral*cos(th) ) - qCentral;
 
-options.Display = 'off'; % turn off folve display
+if deb == 1
+  options.Display = 'iter'; % turn off folve display
+else
+  options.Display = 'off'; % turn off folve display
+end
 options.Algorithm = 'levenberg-marquardt'; % non-square systems
 options.FunctionTolerance = 10*eps;
 options.StepTolerance = 1e4*eps;
@@ -88,19 +104,38 @@ RAprime = r_map( rho_fluid(psiA, xi_map(teAprime), rho0) );
 RBprime = r_map( rho_fluid(psiB, xi_map(teBprime), rho0) );
 
 
-%% Outer base points C (top)
-aphE = barrier_angles*pi/180;
-teE = pi/2/p - aphE;
-xE = Dend/2*cos(teE);
-yE = Dend/2*sin(teE);
+%% Outer base points C,D preparation
+RCprime = Dend/2;
+teCprime = th_map( xi_fluid(psiA, rho_map(RCprime), rho0) );
+xCprime = Dend/2*cos(teCprime);
+yCprime = Dend/2*sin(teCprime);
 
+RDprime = Dend/2;
+teDprime = th_map( xi_fluid(psiB, rho_map(RDprime), rho0) );
+xDprime = Dend/2*cos(teDprime);
+yDprime = Dend/2*sin(teDprime);
+
+if AutoBarrierEndCalc
+  teE = (teCprime + teDprime)/2;
+  aphE = pi/2/p - teE;
+  barrier_angles = 180/pi*aphE;
+  barrier_angles_el = p*barrier_angles;
+else
+  aphE = barrier_angles*pi/180;
+  teE = pi/2/p - aphE;
+end
+xE = Dend/2*cos(teE);
+yE = Dend/2*sin(teE);  
+
+%% Outer base points C (top)
 if strcmp(barrier_end, 'rect')
-  RC = Dend/2;
-  teC = th_map( xi_fluid(psiA, rho_map(RC), rho0) );
-  xC = Dend/2*cos(teC);
-  yC = Dend/2*sin(teC);
+  RC = RCprime;
+  teC = teCprime;
+  xC = xCprime;
+  yC = yCprime;
   xOC = xC;
   yOC = yC;
+
 else
   options.Algorithm = 'trust-region-dogleg'; % non-square systems
   
@@ -127,18 +162,14 @@ else
 end
 
 %% Outer base points D (bottom)
-aphE = barrier_angles*pi/180;
-teE = pi/2/p - aphE;
-xE = Dend/2*cos(teE);
-yE = Dend/2*sin(teE);
-
 if strcmp(barrier_end, 'rect')
-  RD = Dend/2;
-  teD = th_map( xi_fluid(psiB, rho_map(RD), rho0) );
-  xD = Dend/2*cos(teD);
-  yD = Dend/2*sin(teD);
+  RD = RDprime;
+  teD = teDprime;
+  xD = xDprime;
+  yD = yDprime;
   xOD = xD;
   yOD = yD;
+
 else
   options.Algorithm = 'levenberg-marquardt'; % non-square systems
   
@@ -219,8 +250,13 @@ for bkk = 1:Nb
   PhiBD = phiBprime(bkk) + cumsum( repmat(dphiBD', Nstep(bkk) - 1, 1) );
   PsiAC = repmat( psiA(bkk), Nstep(bkk)-1, 1);
   PsiBD = repmat( psiB(bkk), Nstep(bkk)-1, 1);
-  
-  X0 = [repmat(rho0*1.1, numel(PhiAC), 1), repmat(pi/4, numel(PhiAC), 1)];
+
+% 1st try
+%   X0 = [repmat(rho0*1.1, numel(PhiAC), 1), repmat(pi/4, numel(PhiAC), 1)];
+% 2nd try
+%   X0 = [repmat(rho0*1.1, numel(PhiAC), 1), repmat(xi_map(teE(bkk)), numel(PhiAC), 1)];
+% 3rd try
+  X0 = [linspace(rho0, Dend/2, numel(PhiAC))', linspace(pi/4, xi_map(teE(bkk)), numel(PhiAC))'];
   RhoXi_AC = fsolve( @(x) PsiPhi( x(:,1),x(:,2), PsiAC, PhiAC, rho0 ), X0, options);
   RhoXi_BD = fsolve( @(x) PsiPhi( x(:,1),x(:,2), PsiBD, PhiBD, rho0 ), X0, options);
   
@@ -230,8 +266,8 @@ for bkk = 1:Nb
   te_BD = th_map(RhoXi_BD(:,2));
   
   if deb
-    barrier(bkk).R_AC = R_AC;
-    barrier(bkk).R_BD = R_BD;
+    barrier(bkk).R_AC = R_AC/ScalingFactor;
+    barrier(bkk).R_BD = R_BD/ScalingFactor;
     barrier(bkk).te_AC = te_AC;
     barrier(bkk).te_BD = te_BD;
   end
@@ -250,7 +286,7 @@ for bkk = 1:Nb
     xD(bkk) + j*yD(bkk)
     xOD(bkk) + j*yOD(bkk)
     xE(bkk) + j*yE(bkk)
-    ];
+    ]/ScalingFactor;
   
   barrier(bkk).X = real(barrier(bkk).Zeta);
   barrier(bkk).Y = imag(barrier(bkk).Zeta);
@@ -265,28 +301,30 @@ if deb
   figure
   hold on
   tt = linspace(0,pi/p,50);
-  plot(R0*cos(tt), R0*sin(tt), 'k');
-  plot(Dr/2*cos(tt), Dr/2*sin(tt), 'k');
+  plot(R0/ScalingFactor*cos(tt), R0/ScalingFactor*sin(tt), 'k');
+  plot(Dr/2/ScalingFactor*cos(tt), Dr/2/ScalingFactor*sin(tt), 'k');
   axis equal
   % plot the flux-barrier central point
-  plot(RAprime.*exp(j*teAprime), 'rd')
-  plot(RBprime.*exp(j*teBprime), 'bo')
+  plot(RAprime/ScalingFactor.*exp(j*teAprime), 'rd')
+  plot(RBprime/ScalingFactor.*exp(j*teBprime), 'bo')
   
-  plot(xE, yE,'ko')
+  plot(xE/ScalingFactor, yE/ScalingFactor,'ko')
   
-  plot(xOC, yOC,'go')
-  plot(xC, yC,'ro')
-  plot(xOD, yOD,'co')
-  plot(xD, yD,'bo')
+  plot(xOC/ScalingFactor, yOC/ScalingFactor,'go')
+  plot(xC/ScalingFactor, yC/ScalingFactor,'ro')
+  plot(xOD/ScalingFactor, yOD/ScalingFactor,'co')
+  plot(xD/ScalingFactor, yD/ScalingFactor,'bo')
   
   %
   % plot(R_AC.*exp(j*te_AC),'r.-')
   % plot(R_BD.*exp(j*te_BD),'b.-')
   
   for bkk = 1:Nb
+    % plot flux-barrier sideline points
     plot(barrier(bkk).R_AC.*exp(j*barrier(bkk).te_AC),'r.-')
     plot(barrier(bkk).R_BD.*exp(j*barrier(bkk).te_BD),'b.-')
     
+    % plot all the complete flux-barrier
     plot(barrier(bkk).X, barrier(bkk).Y, '.-')
   end
   pause(1e-3)
