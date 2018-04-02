@@ -68,16 +68,16 @@ vy = @(vr_v,vth_v,th) vr_v.*sin(th) + vth_v.*cos(th);
 rho0 = rho_map(R0);
 
 %% Central base points
-RA = Dend/2 - [0, cumsum( tb(1:end-1))] - cumsum(wc(1:end-1)); % top
-RB = RA - tb; % bottom
+RAprime = Dend/2 - [0, cumsum( tb(1:end-1))] - cumsum(wc(1:end-1)); % top
+RBprime = RAprime - tb; % bottom
 te_qAxis = pi/(2*p); % q-axis angle in rotor reference frame
 
 % get A' and B' considering rib and magnet widths
 mCentral = tan(te_qAxis); % slope
 qCentral = repmat( -wrib/2/cos(te_qAxis), 1, 2); % intercept
 
-psiCentralPtA = psi_fluid(rho_map(RA), xi_map(te_qAxis), rho0);
-psiCentralPtB = psi_fluid(rho_map(RB), xi_map(te_qAxis), rho0);
+psiCentralPtA = psi_fluid(rho_map(RAprime), xi_map(te_qAxis), rho0);
+psiCentralPtB = psi_fluid(rho_map(RBprime), xi_map(te_qAxis), rho0);
 psiCentralPt = [psiCentralPtA, psiCentralPtB];
 psiA = psiCentralPtA;
 psiB = psiCentralPtB;
@@ -97,11 +97,11 @@ options.StepTolerance = 1e4*eps;
 
 X0 = repmat(te_qAxis,1,2*Nb);
 options = GetFSolveOptions(options);
-teABprime = fsolve(CentralPt_Eq, X0, options);
-teAprime = teABprime(1:Nb);
-teBprime = teABprime(Nb+1:end);
-RAprime = r_map( rho_fluid(psiA, xi_map(teAprime), rho0) );
-RBprime = r_map( rho_fluid(psiB, xi_map(teBprime), rho0) );
+teAB = fsolve(CentralPt_Eq, X0, options);
+teA = teAB(1:Nb);
+teB = teAB(Nb+1:end);
+RA = r_map( rho_fluid(psiA, xi_map(teA), rho0) );
+RB = r_map( rho_fluid(psiB, xi_map(teB), rho0) );
 
 
 %% Outer base points C,D preparation
@@ -196,8 +196,8 @@ end
 
 %% Flux-barrier points
 % We already have the potentials of the two flux-barrier sidelines
-phiAprime = phi_fluid( rho_map(RAprime), xi_map(teAprime), rho0);
-phiBprime = phi_fluid( rho_map(RBprime), xi_map(teBprime), rho0);
+phiA = phi_fluid( rho_map(RA), xi_map(teA), rho0);
+phiB = phi_fluid( rho_map(RB), xi_map(teB), rho0);
 
 phiC = phi_fluid( rho_map(RC), xi_map(teC), rho0);
 phiD = phi_fluid( rho_map(RD), xi_map(teD), rho0);
@@ -243,11 +243,11 @@ PsiPhi = @(rho,xi, psi,phi, rho0) ...
 % barrier(Nb).te_BD = 0;
 
 for bkk = 1:Nb
-  dphiAC = (phiC(bkk) - phiAprime(bkk))./Nstep(bkk);
-  dphiBD = (phiD(bkk) - phiBprime(bkk))./Nstep(bkk);
+  dphiAC = (phiC(bkk) - phiA(bkk))./Nstep(bkk);
+  dphiBD = (phiD(bkk) - phiB(bkk))./Nstep(bkk);
   % we create the matrix of potentials phi needed for points intersections
-  PhiAC = phiAprime(bkk) + cumsum( repmat(dphiAC', Nstep(bkk) - 1, 1) );
-  PhiBD = phiBprime(bkk) + cumsum( repmat(dphiBD', Nstep(bkk) - 1, 1) );
+  PhiAC = phiA(bkk) + cumsum( repmat(dphiAC', Nstep(bkk) - 1, 1) );
+  PhiBD = phiB(bkk) + cumsum( repmat(dphiBD', Nstep(bkk) - 1, 1) );
   PsiAC = repmat( psiA(bkk), Nstep(bkk)-1, 1);
   PsiBD = repmat( psiB(bkk), Nstep(bkk)-1, 1);
 
@@ -279,9 +279,9 @@ for bkk = 1:Nb
     xOC(bkk) + j*yOC(bkk)
     xC(bkk) + j*yC(bkk)
     flipud( R_AC.*exp(j*te_AC) )
-    RAprime(bkk).*exp(j*teAprime(bkk))
+    RA(bkk).*exp(j*teA(bkk))
     % bottom side
-    RBprime(bkk).*exp(j*teBprime(bkk))
+    RB(bkk).*exp(j*teB(bkk))
     R_BD.*exp(j*te_BD)
     xD(bkk) + j*yD(bkk)
     xOD(bkk) + j*yOD(bkk)
@@ -305,8 +305,8 @@ if deb
   plot(Dr/2/ScalingFactor*cos(tt), Dr/2/ScalingFactor*sin(tt), 'k');
   axis equal
   % plot the flux-barrier central point
-  plot(RAprime/ScalingFactor.*exp(j*teAprime), 'rd')
-  plot(RBprime/ScalingFactor.*exp(j*teBprime), 'bo')
+  plot(RA/ScalingFactor.*exp(j*teA), 'rd')
+  plot(RB/ScalingFactor.*exp(j*teB), 'bo')
   
   plot(xE/ScalingFactor, yE/ScalingFactor,'ko')
   

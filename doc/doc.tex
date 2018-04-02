@@ -1,6 +1,7 @@
 \documentclass[b5paper,11pt,oneside,fleqn]{article}
 \usepackage{amsmath,amsthm,amssymb}
 
+\usepackage{graphicx}
 \usepackage{geometry}
 \usepackage{xifthen}
 
@@ -52,6 +53,8 @@ w_{\textup{rib}
 \usepackage{url}
 \usepackage{hyperref}
 
+\newcommand{\nonfinito}{\emph{to be continued\ldots}}
+
 \begin{document}
 \maketitle
 
@@ -65,6 +68,11 @@ Giacomo Bacco, \emph{fluid: Free Fluid Flux-Barriers Rotor for Synchronous
 Reluctance Motor Drawing}, GitHub, 2018, available at:
 \url{https://github.com/gbacco5/fluid}
 }
+
+
+\tableofcontents
+
+
 
 \section{Flow past a cylinder}
 
@@ -141,6 +149,23 @@ v_\te(r,\te) &= v_r \sin\te + v_\te \cos\te
 
 
 \section{Computation of flux-barrier base points}
+
+Refer to \autoref{fig: flux-barrier base points} for the points naming scheme.
+Keep in mind that $ \pt{A}' $ is not simply the projection of $ \pt{A} $ onto 
+the $ q $-axis, but it represent the original starting point for the barrier 
+sideline, so it lies on the flux-barrier streamline. The same is true for 
+points
+$ \pt{B}',\pt{B} $, 
+$ \pt{C}',\pt{C} $, and
+$ \pt{D}',\pt{D} $.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=0.75\linewidth]{gfx/BarrierPoints/BarrierPoints}
+\caption{Flux-barrier base points description.}
+\label{fig: flux-barrier base points}
+\end{figure}
+
 Let the flux-barrier and flux-carrier thicknesses be given.
 Then the base points for the flux-barriers can be computed easily.
 Let
@@ -161,20 +186,21 @@ Then
 \begin{equation}
 \begin{aligned}
 R\ped{r} &= \frac{D\ped{r}}{2} - \wribt \\
-R_\pt{A_1} &= R\ped{r} - \wc[1] \\
-R_\pt{B_1} &= R_\pt{A_1} - \tb[1] \\
+R_\pt{A_1'} &= R\ped{r} - \wc[1] \\
+R_\pt{B_1'} &= R_\pt{A_1'} - \tb[1] \\
     &\:\:\,\vdots
 \end{aligned}
 \end{equation}
+where $ R $ represents the radius from the origin.
 %
 So, in general:
 \begin{equation}
 \begin{aligned}
-R_\pt{A_k} &= R_\pt{B_{k-1}} - \wc[k] \\
-R_\pt{B_k} &= R_\pt{A_{k-1}} - \tb[k]
+R_\pt{A_k'} &= R_\pt{B_{k-1}'} - \wc[k] \\
+R_\pt{B_k'} &= R_\pt{A_{k-1}'} - \tb[k]
 \end{aligned}
 \end{equation}
-with the exception $ R_\pt{B_0} = R\ped{r} $.
+with the exception $ R_\pt{B_0'} = R\ped{r} $.
 
 Now we know both the radii and the angle -- always $ \pi/(2p) $ -- of the
 flux-barrier internal points. So we can compute their respective streamline
@@ -191,31 +217,34 @@ where $ \wm[k] $ is the \xth{k} magnet width.
 
 \subsection{Central base points}
 We refer to points $ \pt{A} $ and $ \pt{B} $.
+If the rib width is zero
+$ \pt{A} \equiv \pt{A}' $ and
+$ \pt{B} \equiv \pt{B}' $.
 
 The line describing the $ q $-axis is
 \begin{equation}
 \begin{aligned}
 y &= m x + q \\
 m &= \tan\frac{\pi}{2p} \\
-q &= \frac{\wrib}{\cos\frac{\pi}{2p}}
+q &= \frac{\wrib}{2 \cos\frac{\pi}{2p}}
 \end{aligned}
 \end{equation}
 
 \begin{equation}
 \begin{cases}
-y_\pt{A'} - m x_\pt{A'} - q = 0 \\
-x_\pt{A'} - r_\pt{A'}(\psi_\pt{A},\te_\pt{A'}) \cos\te_\pt{A'} = 0 \\
-y_\pt{A'} - r_\pt{A'}(\psi_\pt{A},\te_\pt{A'}) \sin\te_\pt{A'} = 0 \\
+y_\pt{A} - m x_\pt{A} - q = 0 \\
+x_\pt{A} - r_\pt{A}(\psi_\pt{A'},\te_\pt{A}) \cos\te_\pt{A} = 0 \\
+y_\pt{A} - r_\pt{A}(\psi_\pt{A'},\te_\pt{A}) \sin\te_\pt{A} = 0 \\
 \end{cases}
 \end{equation}
 where $ \te_\pt{A} $ is used as the third degree of freedom and $ r_\pt{A} $ is
 then a function of it.
 The solution of such system can be determined solving the single equation
 \begin{equation}
-r_\pt{A'}(\psi_\pt{A},\te_\pt{A'})
-\bigl( \sin\te_\pt{A'} - m \cos\te_\pt{A'} \bigr) - q = 0
+r_\pt{A}(\psi_\pt{A'},\te_\pt{A})
+\bigl( \sin\te_\pt{A} - m \cos\te_\pt{A} \bigr) - q = 0
 \end{equation}
-in the unknown $ \te_\pt{A'} $.
+in the unknown $ \te_\pt{A} $.
 The function $ r(\psi,\te) $ is simply
 \[
 r(\psi,\te) = \sqrt[p]{ \rho(\psi,\te/p) \bigr) }
@@ -227,7 +256,7 @@ substitution and repeated for all the flux-barriers.
 
 
 \section{Outer base points}
-We refer to points $ \pt{C} $, $ \pt{D} $, and $ E $.
+We refer to points $ \pt{C} $, $ \pt{D} $, and $ \pt{E} $.
 If the flux-barrier angle, $ \ab $, is given, then
 \begin{equation}
 \begin{aligned}
@@ -274,9 +303,17 @@ The very same system can be written and solved for point $ \pt{D} $.
 
 \section{Flux-barrier sideline points}
 
+\nonfinito 
 
 
 
+\section{Example of Matlab/Octave plot}
+
+\includegraphics[width=0.75\linewidth]{gfx/MatlabOutput}
+
+Here is an example of a Matlab/Octave output plot.
+The V-shaped lines represent the radii of the fillet arcs, which were not worth 
+to be shown in Matlab/Octave.
 
 
 
