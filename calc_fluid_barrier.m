@@ -32,7 +32,11 @@ if isfield(r,'wm')
 else
   wm = 0;
 end
-wrib = r.wrib*ScalingFactor + wm; % [m], radial iron rib widths
+if isfield(r,'wrib')
+  wrib = r.wrib*ScalingFactor + wm; % [m], radial iron rib widths
+else
+  wrib = zeros(1,Nb) + wm;
+end 
 
 
 Dend = Dr - 2*wrib_t; % [m], flux-barrier end diameter
@@ -68,7 +72,7 @@ vy = @(vr_v,vth_v,th) vr_v.*sin(th) + vth_v.*cos(th);
 rho0 = rho_map(R0);
 
 %% Central base points
-RAprime = Dend/2 - [0, cumsum( tb(1:end-1))] - cumsum(wc(1:end-1)); % top
+RAprime = Dend(1)/2 - [0, cumsum( tb(1:end-1))] - cumsum(wc(1:end-1)); % top
 RBprime = RAprime - tb; % bottom
 te_qAxis = pi/(2*p); % q-axis angle in rotor reference frame
 
@@ -107,13 +111,13 @@ RB = r_map( rho_fluid(psiB, xi_map(teB), rho0) );
 %% Outer base points C,D preparation
 RCprime = Dend/2;
 teCprime = th_map( xi_fluid(psiA, rho_map(RCprime), rho0) );
-xCprime = Dend/2*cos(teCprime);
-yCprime = Dend/2*sin(teCprime);
+xCprime = Dend/2.*cos(teCprime);
+yCprime = Dend/2.*sin(teCprime);
 
 RDprime = Dend/2;
 teDprime = th_map( xi_fluid(psiB, rho_map(RDprime), rho0) );
-xDprime = Dend/2*cos(teDprime);
-yDprime = Dend/2*sin(teDprime);
+xDprime = Dend/2.*cos(teDprime);
+yDprime = Dend/2.*sin(teDprime);
 
 if AutoBarrierEndCalc
   teE = (teCprime + teDprime)/2;
@@ -124,8 +128,8 @@ else
   aphE = barrier_angles*pi/180;
   teE = pi/2/p - aphE;
 end
-xE = Dend/2*cos(teE);
-yE = Dend/2*sin(teE);  
+xE = Dend/2.*cos(teE);
+yE = Dend/2.*sin(teE);  
 
 %% Outer base points C (top)
 if strcmp(barrier_end, 'rect')
@@ -149,7 +153,7 @@ else
     %   th - xi_fluid((rho_fluid(p*th, psiA', rho0)), psiA', rho0)/p % serve?
     ];
   
-  X0 = [ teE', 0*xE', 0*yE', 0*xE', 0*yE', 0*xE'];
+  X0 = [ 1.5*teE', 0.9*xE', 0.9*yE', 0.8*xE', 0.8*yE', 0.25*xE'];
   % X0 = [ aph_b, 0, 0, 0, 0, 0];
   X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
   
@@ -183,7 +187,7 @@ else
     %   th - xi_fluid((rho_fluid(p*th, psi_d, rho0)), psi_d, rho0)/p % serve?
     ];
   
-  X0 = [ teE', xE', .8*yE', xE'*.9, yE'*.9, xE'*.1];
+  X0 = [ 0.8*teE', 0.8*xE', 0.8*yE', xE'*.9, yE'*.9, xE'*.2];
   X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
   
   xOD = X(:,4)';
@@ -241,6 +245,7 @@ PsiPhi = @(rho,xi, psi,phi, rho0) ...
 % barrier(Nb).R_BD = 0;
 % barrier(Nb).te_AC = 0;
 % barrier(Nb).te_BD = 0;
+barrier(Nb) = struct;
 
 for bkk = 1:Nb
   dphiAC = (phiC(bkk) - phiA(bkk))./Nstep(bkk);
@@ -273,23 +278,24 @@ for bkk = 1:Nb
   end
   
   % output of points
-  barrier(bkk).Zeta = [...
+%   barrier(bkk).Zeta = [...
+  Zeta = [...
     % top side
-    xE(bkk) + j*yE(bkk)
-    xOC(bkk) + j*yOC(bkk)
-    xC(bkk) + j*yC(bkk)
-    flipud( R_AC.*exp(j*te_AC) )
-    RA(bkk).*exp(j*teA(bkk))
+    xE(bkk) + 1j*yE(bkk)
+    xOC(bkk) + 1j*yOC(bkk)
+    xC(bkk) + 1j*yC(bkk)
+    flipud( R_AC.*exp(1j*te_AC) )
+    RA(bkk).*exp(1j*teA(bkk))
     % bottom side
-    RB(bkk).*exp(j*teB(bkk))
-    R_BD.*exp(j*te_BD)
-    xD(bkk) + j*yD(bkk)
-    xOD(bkk) + j*yOD(bkk)
-    xE(bkk) + j*yE(bkk)
+    RB(bkk).*exp(1j*teB(bkk))
+    R_BD.*exp(1j*te_BD)
+    xD(bkk) + 1j*yD(bkk)
+    xOD(bkk) + 1j*yOD(bkk)
+    xE(bkk) + 1j*yE(bkk)
     ]/ScalingFactor;
   
-  barrier(bkk).X = real(barrier(bkk).Zeta);
-  barrier(bkk).Y = imag(barrier(bkk).Zeta);
+  barrier(bkk).X = real(Zeta);
+  barrier(bkk).Y = imag(Zeta);
   
 end
 
@@ -305,8 +311,8 @@ if deb
   plot(Dr/2/ScalingFactor*cos(tt), Dr/2/ScalingFactor*sin(tt), 'k');
   axis equal
   % plot the flux-barrier central point
-  plot(RA/ScalingFactor.*exp(j*teA), 'rd')
-  plot(RB/ScalingFactor.*exp(j*teB), 'bo')
+  plot(RA/ScalingFactor.*exp(1j*teA), 'rd')
+  plot(RB/ScalingFactor.*exp(1j*teB), 'bo')
   
   plot(xE/ScalingFactor, yE/ScalingFactor,'ko')
   
@@ -321,8 +327,8 @@ if deb
   
   for bkk = 1:Nb
     % plot flux-barrier sideline points
-    plot(barrier(bkk).R_AC.*exp(j*barrier(bkk).te_AC),'r.-')
-    plot(barrier(bkk).R_BD.*exp(j*barrier(bkk).te_BD),'b.-')
+    plot(barrier(bkk).R_AC.*exp(1j*barrier(bkk).te_AC),'r.-')
+    plot(barrier(bkk).R_BD.*exp(1j*barrier(bkk).te_BD),'b.-')
     
     % plot all the complete flux-barrier
     plot(barrier(bkk).X, barrier(bkk).Y, '.-')
