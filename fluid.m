@@ -6,7 +6,6 @@
 clear all; close all; clc;
 addpath(genpath('./'))
 
-
 %% DATA
 rotor.p = 2; % number of pole pairs
 mm = 1e-3; % millimeters
@@ -22,7 +21,7 @@ rotor.barrier_angles_el = [14,26,38]*2; % [deg], electrical flux-barrier angles
 % rotor.barrier_end = 'rect'; % choose 'rect' or comment
 
 rotor.wrib = [1,2,4]*mm; % [m], radial iron rib widths
-
+% rotor.wm = [10,20,40]*mm;
 
 %% barrier points computation
 barrier = calc_fluid_barrier(rotor);
