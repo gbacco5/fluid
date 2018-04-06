@@ -2,8 +2,25 @@
 \usepackage{amsmath,amsthm,amssymb}
 
 \usepackage{graphicx}
+\graphicspath{{gfx/}}
 \usepackage{geometry}
 \usepackage{xifthen}
+
+\usepackage[svgnames, dvipsnames]{xcolor}
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0}
+\definecolor{VlightBlue}{rgb}{.96,.98,1}
+\definecolor{MyDarkBlue}{rgb}{.0,.0,0.3}
+\definecolor{MyDarkRed}{rgb}{0.4, 0, 0}
+
+\usepackage{listings}
+\lstset{
+        basicstyle=\small\ttfamily,             % Use small true type font
+        columns=fullflexible,
+        keepspaces=true,
+        tabsize=2
+}
+\input{matlab}
+
 
 \title{\raggedleft\sffamily\Huge fluid}
 \author{\sffamily\itshape Bacco, Giacomo}
@@ -16,6 +33,7 @@
 \newcommand{\ap}[1]{^\textup{#1}}
 \newcommand{\pt}[1]{\mathsf{#1}}
 \newcommand{\te}{\vartheta}
+\newcommand{\Nstep}{N_{\textup{step}}}
 
 % magnet width
 \newcommand{\wm}[1][]{%
@@ -54,6 +72,7 @@ w_{\textup{rib}
 \usepackage{hyperref}
 
 \newcommand{\nonfinito}{\emph{to be continued\ldots}}
+\newcommand{\dirpath}{\texttt}
 
 \begin{document}
 \maketitle
@@ -74,15 +93,108 @@ Reluctance Motor Drawing}, GitHub, 2018, available at:
 
 
 
-\section{Flow past a cylinder}
+\section*{Goal}
+Provide a ready-to-use fully parametric drawing of the Synchronous Reluctance 
+Rotor with fluid flux-barriers.
+
+The scope of this project is the computation of the flux-barriers points.
+The drawing scripts are for demonstration purposes only.
+
+
+\section*{Requirements}
+Matlab or Octave to compute the points. The points calculation is general, so 
+it could be implemented in any language, but I chose Matlab/Octave because it 
+is my standard interface with \href{http://www.femm.info/}{FEMM} software.
+
+If you do not use FEMM, you can still use the calculation part and make a 
+porting for your CAD engine or FEA software. If you do so, consider 
+contributing to the project adding your interface scripting.
+
+\section*{Contacts}
+You can contact me at
+\href{mailto:giacomo.bacco@phd.unipd.it}{giacomo.bacco@phd.unipd.it}.
+
+If you find a bug, consider opening an issue at 
+\url{https://github.com/gbacco5/fluid/issues}
+
+\vfill
+{\footnotesize\noindent  Last update: \today}
+
+\vfill
+Notice:
+\lstinputlisting{../NOTICE.}
+
+
+
+\clearpage
+\section{How to use}
+
+Open the file \lstinline|fluid| and run it.
+
+Change the machine data in the data section.
+All the variables have a comment next to them.
+
+There are some ``hidden'' options which should be explained.
+\begin{enumerate}
+\item you can provide personal flux barrier angles, or let the program compute 
+them as the average of the final points $ \pt{C} $ and $ \pt{D} $ at the rotor 
+periphery.
+This means that you have to always provide the flux-barrier thicknesses and 
+flux-carrier widths.
+Optionally, you could also provide the electrical flux-barrier angles.
+
+\item by default, the flux-barrier-end is round, so the code solves an 
+additional system to determine the correct locations of the fillet points.
+You can skip such system declaring 
+\begin{lstlisting}[style=Matlab]
+rotor.barrier_end = 'rect';
+\end{lstlisting}
+and so selecting ``rectangular'' flux-barrier-end.
+
+\item the inner radial iron ribs are optional, but you are free to provide 
+different widths for every flux-barrier.
+\begin{lstlisting}[style=Matlab]
+rotor.wrib = [1,2,4]*mm;
+\end{lstlisting}
+
+\item if you also input magnet widths, the rib is automatically enlarged to 
+accommodate the magnet, similarly to an IPM (Interior Permanent Magnet) machine.
+\begin{lstlisting}[style=Matlab]
+rotor.wm = [10,20,40]*mm;
+\end{lstlisting}
+
+\end{enumerate}
+
+
+
+\clearpage
+\section{Examples}
+Here are some finished examples based on the output.
+The drawings are for demonstration purposes only.
+
+\vspace{\baselineskip}
+
+\includegraphics[width=0.5\linewidth]{ex1}
+\includegraphics[width=0.5\linewidth]{ex2}
+\vspace{\baselineskip}
+
+\includegraphics[width=0.75\linewidth]{ex3}
+
+
+\clearpage
+\section{Theory}
+
+\subsection{Flow past a cylinder}
 
 Let $ \rho_0 $ be the radius of the cylinder, $ \rho,\xi $ the polar coordinate
 system in use.
 One possible solution of this problem have these potential and streamline
 functions:
 \begin{align}
-\phi(\rho,\xi) &= \left( \rho + \frac{\rho_0^2}{\rho} \right) \cos\xi \\[1ex]
+\phi(\rho,\xi) &= \left( \rho + \frac{\rho_0^2}{\rho} \right) \cos\xi 
+\label{eq:potential}\\[1ex]
 \psi(\rho,\xi) &= \left( \rho - \frac{\rho_0^2}{\rho} \right) \sin\xi
+\label{eq:streamline}
 \end{align}
 Although these equations are deeply coupled, the radius $ \rho $ and the phase
 $ \xi $ can be obtained as a function of the other quantities.
@@ -106,7 +218,7 @@ v_\xi(\rho,\xi)  &= \frac{1}{\rho} \frac{\de\phi}{\de\xi}  =
 
 
 
-\section{Conformal mapping}
+\subsection{Conformal mapping}
 From the reference plane, which is equivalent to a two-pole machine,
 we use a complex map to obtain the quantities in the actual plane.
 Let $ p $ be the number of pole pairs. Then:
@@ -148,7 +260,7 @@ v_\te(r,\te) &= v_r \sin\te + v_\te \cos\te
 
 
 
-\section{Computation of flux-barrier base points}
+\subsection{Computation of flux-barrier base points}
 
 Refer to \autoref{fig: flux-barrier base points} for the points naming scheme.
 Keep in mind that $ \pt{A}' $ is not simply the projection of $ \pt{A} $ onto 
@@ -208,14 +320,14 @@ value.
 
 
 
-\subsection{Magnet insertion}
+\subsubsection{Magnet insertion}
 \[
 \wrib[k] = \wrib[k] + \wm[k]
 \]
 where $ \wm[k] $ is the \xth{k} magnet width.
 
 
-\subsection{Central base points}
+\subsubsection{Central base points}
 We refer to points $ \pt{A} $ and $ \pt{B} $.
 If the rib width is zero
 $ \pt{A} \equiv \pt{A}' $ and
@@ -255,7 +367,7 @@ substitution and repeated for all the flux-barriers.
 
 
 
-\section{Outer base points}
+\subsection{Outer base points}
 We refer to points $ \pt{C} $, $ \pt{D} $, and $ \pt{E} $.
 If the flux-barrier angle, $ \ab $, is given, then
 \begin{equation}
@@ -301,13 +413,52 @@ The very same system can be written and solved for point $ \pt{D} $.
 
 
 
-\section{Flux-barrier sideline points}
+\subsection{Flux-barrier sideline points}
 
-\nonfinito 
+Consider the top flux-barrier sideline, so the one going from point $ \pt{A} $ 
+to point $ \pt{C} $.
+We want to create such sideline using a predetermined number of steps,
+$ \Nstep $. From now on, let us call this number $ N $, 
+and $ N_k $ for the $ k $-th flux-barrier.
+
+One of the best way to distribute the points along the streamline is to use the 
+potential function, $ \phi $, defined in \autoref{eq:potential}.
+We start computing the potential for points $ \pt{A} $ and $ \pt{C} $:
+\begin{equation*}
+\begin{aligned}
+\phi_\pt{A} &= \phi(\rho_\pt{A}, \xi_\pt{A}) \\
+\phi_\pt{C} &= \phi(\rho_\pt{C}, \xi_\pt{C}) 
+\end{aligned}
+\end{equation*}
+Then, we want to find $ N-1 $ points along the streamline
+between points $ \pt{A} $ and $ \pt{C} $
+with a uniform distribution of the potential function.
+We define
+\begin{equation*}
+\Delta\phi_{\pt{AC}} = \frac{\phi_\pt{C} - \phi_\pt{A}}{N}
+\end{equation*}
+So we can compute the potentials we are looking for
+\[
+\phi_i = \phi_\pt{A} + i \Delta\phi_{\pt{AC}} \,,\quad i=1,\ldots,N-1
+\]
+and finally the location of the point with this potential value and the 
+streamline function value required to lie on the flux-barrier sideline.
+This translates to the following system of equations:
+\begin{equation}
+\begin{cases}
+\psi_{\pt{AC}} - \psi(\rho,\xi) = 0 \\
+\phi_i - \phi(\rho,\xi) = 0
+\end{cases}
+\end{equation}
+The system is well-defined because there are two unknowns and two independent 
+equations. This system must be solved for every flux-barrier sideline point, 
+for the two sides, and for every flux-barrier.\footnote{In Matlab/Octave, the 
+``for every flux-barrier sideline point'' loop has been vectorized, while the 
+two sides has been manually split.}
 
 
 
-\section{Example of Matlab/Octave plot}
+\subsection{Example of Matlab/Octave plot}
 
 \includegraphics[width=0.75\linewidth]{gfx/MatlabOutput}
 
@@ -315,6 +466,22 @@ Here is an example of a Matlab/Octave output plot.
 The V-shaped lines represent the radii of the fillet arcs, which were not worth 
 to be shown in Matlab/Octave.
 
+
+
+
+\clearpage
+\section{Code}
+
+\subsection{Main file}
+\lstinputlisting[style=Matlab]{../fluid.m}
+\clearpage
+
+\subsection{Calc fluid barrier}
+\lstinputlisting[style=Matlab]{../calc_fluid_barrier.m}
+\clearpage
+
+\subsection{Draw fluid barrier}
+\lstinputlisting[style=Matlab]{../draw/draw_fluid_barrier.m}
 
 
 
