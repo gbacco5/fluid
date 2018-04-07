@@ -14,6 +14,7 @@ if ~exist('test','dir')
 end
 
 %% DATA
+try 
 openfemm(1)
 mm = 1e-3; % millimeters
 rotor.De = 200*mm; % [m], rotor outer diameter
@@ -72,4 +73,7 @@ for p = [1:50] % number of pole pairs
 end
 
 closefemm;
+catch
+  disp('FEMM not available.');
+end 
 toc

@@ -102,9 +102,10 @@ The drawing scripts are for demonstration purposes only.
 
 
 \section*{Requirements}
-Matlab or Octave to compute the points. The points calculation is general, so 
-it could be implemented in any language, but I chose Matlab/Octave because it 
-is my standard interface with \href{http://www.femm.info/}{FEMM} software.
+Matlab or Octave or Python (NumPy + SciPy) to compute the points.
+The points calculation is general, so it could be implemented in any language, 
+but I chose Matlab/Octave because it is my standard interface with 
+\href{http://www.femm.info/}{FEMM} software.
 
 If you do not use FEMM, you can still use the calculation part and make a 
 porting for your CAD engine or FEA software. If you do so, consider 
@@ -179,6 +180,23 @@ The drawings are for demonstration purposes only.
 \vspace{\baselineskip}
 
 \includegraphics[width=0.75\linewidth]{ex3}
+
+
+\section{Files needed}
+
+For Matlab/Octave, the files needed for the computation are 
+
+\texttt{fluid.m} and 
+
+\texttt{calc\_fluid\_barrier.m}
+
+\noindent
+while for Python they are 
+
+\texttt{fluid.py} and 
+
+\texttt{fluid\_functions.py}.
+
 
 
 \clearpage
