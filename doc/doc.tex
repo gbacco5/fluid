@@ -21,6 +21,36 @@
 }
 \input{matlab}
 
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{calc,positioning,shapes.geometric,shapes.symbols,shapes.misc,arrows,math,arrows.meta}
+
+
+\usepackage{filecontents}
+\begin{filecontents}{fluid.bib}
+@online{Bacco2018fluid,
+title = {fluid: Free Fluid Flux-Barriers Rotor for Synchronous 
+Reluctance Motor Drawing},
+author = {Bacco, Giacomo},
+journal = {GitHub},
+url = {https://github.com/gbacco5/fluid},
+urldate = {\today},
+doi = {10.5281/zenodo.1214698},
+date = {2018},
+}
+\end{filecontents}
+
+\usepackage[
+backend=biber,
+style=alphabetic,
+doi=true,
+sorting=ynt
+]{biblatex}
+\addbibresource{fluid.bib}
+
+
+
+
 
 \title{\raggedleft\sffamily\Huge fluid}
 \author{\sffamily\itshape Bacco, Giacomo}
@@ -82,10 +112,13 @@ w_{\textup{rib}
 Please cite this work if you have used it in your project or in your program.
 \vspace{0\baselineskip}
 
-{\small\noindent%
-Giacomo Bacco, \emph{fluid: Free Fluid Flux-Barriers Rotor for Synchronous 
-Reluctance Motor Drawing}, GitHub, 2018, available at:
-\url{https://github.com/gbacco5/fluid}
+%{\small\noindent%
+%Giacomo Bacco, \emph{fluid: Free Fluid Flux-Barriers Rotor for Synchronous 
+%Reluctance Motor Drawing}, GitHub, 2018, available at:
+%\url{https://github.com/gbacco5/fluid}
+%}
+{\noindent%
+\fullcite{Bacco2018fluid}
 }
 
 
@@ -111,6 +144,31 @@ If you do not use FEMM, you can still use the calculation part and make a
 porting for your CAD engine or FEA software. If you do so, consider 
 contributing to the project adding your interface scripting.
 
+
+\section{Files needed}
+
+For Matlab/Octave, the files needed for the computation are
+
+%\texttt{fluid.m} and 
+
+\texttt{calc\_fluid\_barrier.m},
+
+\texttt{GetFSolveOptions.m} and
+
+\texttt{isOctave.m}
+
+
+\noindent
+while for Python it is
+
+%\texttt{fluid.py} and 
+
+\texttt{fluid\_functions.py}.
+
+
+
+\newpage
+
 \section*{Contacts}
 You can contact me at
 \href{mailto:giacomo.bacco@phd.unipd.it}{giacomo.bacco@phd.unipd.it}.
@@ -121,7 +179,7 @@ If you find a bug, consider opening an issue at
 \vfill
 {\footnotesize\noindent  Last update: \today}
 
-\vfill
+\vspace{3cm}
 Notice:
 \lstinputlisting{../NOTICE.}
 
@@ -163,6 +221,8 @@ accommodate the magnet, similarly to an IPM (Interior Permanent Magnet) machine.
 \begin{lstlisting}[style=Matlab]
 rotor.wm = [10,20,40]*mm;
 \end{lstlisting}
+In this case, the output structure \texttt{barrier} also contains the location 
+of the magnet base center point.
 
 \end{enumerate}
 
@@ -182,27 +242,83 @@ The drawings are for demonstration purposes only.
 \includegraphics[width=0.75\linewidth]{ex3}
 
 
-\section{Files needed}
-
-For Matlab/Octave, the files needed for the computation are 
-
-\texttt{fluid.m} and 
-
-\texttt{calc\_fluid\_barrier.m}
-
-\noindent
-while for Python they are 
-
-\texttt{fluid.py} and 
-
-\texttt{fluid\_functions.py}.
-
 
 
 \clearpage
 \section{Theory}
 
 \subsection{Flow past a cylinder}
+
+\begin{center}
+\begin{tikzpicture}
+\def \Rzero {1.5cm};
+\def \lvec {\Rzero/1.5};
+%
+% add streamlines
+\begin{axis}[hide axis,
+enlargelimits=false,
+%xmin=0,xmax={6*\Rzero},
+%ymin=0,ymax={3*\Rzero}
+x = \Rzero, y=\Rzero,
+%width={6*\Rzero}%,
+%height={4*\Rzero},
+ymin = 0,xmax=4%,
+%axis background/.style={fill=white}
+]
+%
+%\def \psidraw {0.1};
+%
+\foreach \psidraw in {0.2,0.4,...,1.8} {
+\addplot [color=gray,domain=pi/128:pi/2,samples=50]
+( {1*( (\psidraw + sqrt(\psidraw^2 + 4*(sin(deg(x)))^2 ))/(2*sin(deg(x))) 
+)*cos(deg(x))} ,
+{1*( (\psidraw + sqrt(\psidraw^2 + 4*(sin(deg(x)))^2 ))/(2*sin(deg(x))) 
+)*sin(deg(x))} ) ; 
+%(
+%{ cos(deg(x)) },
+%{ sin(deg(x)) }
+%) ;
+}
+\end{axis}
+%
+% draw (x,y) reference frame
+\draw [->] ({-\Rzero/2},0) -- ({4.5*\Rzero},0);
+\node [anchor=north east] (abscissa) at ({4.5*\Rzero},0)
+{$\chi$} ;
+\draw [->] (0,{-\Rzero/2}) -- (0,{2.5*\Rzero});
+\node [anchor=north east] (ordinate) at (0,{2.5*\Rzero})
+{$\eta$} ;
+%
+\draw [very thick] (\Rzero,0cm) arc [start angle = 0, end angle = 120, 
+radius=\Rzero];
+\draw (\Rzero,1mm) -- (\Rzero,-1mm) node[anchor=north] {$\rho_0$};
+% draw (rho,theta) ref. frame
+\draw [->] (0,0) -- node[anchor=south west] {$ \rho $} (25:{2.5*\Rzero - 
+0.5mm}) ;
+\draw [fill=black] (25:{2.5*\Rzero}) circle [radius=0.5mm];
+\draw [arrows = {|[slant=1]->}] (0:{2.5*\Rzero})
+arc [start angle=0, end angle=24.5, radius={2.5*\Rzero}] 
+node[midway,anchor=west]{$ \xi $};
+
+%
+%% add vectors of interest
+%\coordinate (A) at ({5*\Rzero},\Rzero) ;
+%\coordinate (B) at (75:\Rzero) ;
+%\coordinate (C) at (0:{3.5*\Rzero}) ;
+%\draw [-latex,NavyBlue,thick] (A) --
+%node[anchor=south] {$ B_\infty $}
+%node[anchor=north] {(\textsc{bc3})} ++(\lvec,0);
+%\draw [-latex,Maroon,thick] (B) --
+%node[anchor=east] {$ B_\rho = 0 $}
+%node[anchor=west] {(\textsc{bc1})} ++(75:\lvec);
+%\draw [-latex,OliveGreen,thick]
+%(C) node[anchor=north] {$ B_\theta = 0 $} --
+%++(90:\lvec) node[anchor=south] {(\textsc{bc2})};
+%
+\end{tikzpicture}
+\end{center}
+
+
 
 Let $ \rho_0 $ be the radius of the cylinder, $ \rho,\xi $ the polar coordinate
 system in use.
@@ -470,9 +586,46 @@ This translates to the following system of equations:
 \end{equation}
 The system is well-defined because there are two unknowns and two independent 
 equations. This system must be solved for every flux-barrier sideline point, 
-for the two sides, and for every flux-barrier.\footnote{In Matlab/Octave, the 
-``for every flux-barrier sideline point'' loop has been vectorized, while the 
-two sides has been manually split.}
+for the two sides, and for every flux-barrier.%
+\footnote{In Matlab/Octave, the ``for every flux-barrier sideline point'' loop 
+has been vectorized, while the two sides has been manually split.}
+
+
+\subsection{Output}
+
+The output of the computation function in Matlab/Octave is one vector of 
+structures (\texttt{barrier(:)}) which contains at least two fields (\texttt{X} 
+and \texttt{Y}).
+%
+The $ X $ vector is made in this way:
+\[
+X = 
+\begin{bmatrix}
+x_\pt{E} &
+x_{\pt{O}_{\pt{C}}} & 
+x_\pt{C} &
+%
+x_{\pt{AC}_{\Nstep-1}} &
+\cdots &
+x_{\pt{AC}_1} &
+x_\pt{A} &
+\searrow \\
+%
+x_\pt{B} & 
+x_{\pt{BD}_1} &
+\cdots &
+x_{\pt{BD}_{\Nstep-1}} &
+%
+x_\pt{D} &
+x_{\pt{O}_{\pt{D}}} & 
+x_\pt{E} 
+\end{bmatrix}\ap{T}
+\]
+and similarly the $ Y $ vector. So the points are ordered starting from the 
+point $ \pt{E} $ and then moving counter-clockwise until $ \pt{E} $ is reached 
+again.
+
+
 
 
 

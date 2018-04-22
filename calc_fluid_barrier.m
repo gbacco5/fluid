@@ -107,6 +107,12 @@ teB = teAB(Nb+1:end);
 RA = r_map( rho_fluid(psiA, xi_map(teA), rho0) );
 RB = r_map( rho_fluid(psiB, xi_map(teB), rho0) );
 
+% magnet central base point radius computation
+RAsecond = RA.*cos(te_qAxis - teA);
+RBsecond = RB.*cos(te_qAxis - teB);  
+
+Rmag = (RAprime + RAsecond + RBprime + RBsecond)/4;
+
 
 %% Outer base points C,D preparation
 RCprime = Dend/2;
@@ -296,6 +302,9 @@ for bkk = 1:Nb
   
   barrier(bkk).X = real(Zeta);
   barrier(bkk).Y = imag(Zeta);
+  
+  % magnet central base point
+  barrier(bkk).Rm = Rmag(bkk)/ScalingFactor;
   
 end
 

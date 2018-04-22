@@ -13,17 +13,17 @@ mm = 1e-3; % millimeters
 rotor.De = 200*mm; % [m], rotor outer diameter
 
 rotor.Nb = 3; % number of flux-barriers
-rotor.tb = [4 8 15]*mm; % flux-barrier widths
+rotor.tb = [4 8 15]*mm; % flux-barrier thicknesses
 rotor.wc = [3 7 12 10]*mm; % flux-carrier widths
-rotor.Nstep = [2, 4, 6]; % number of steps to draw the flux-barrier side
+rotor.Nstep = 3*[2, 4, 6]; % number of steps to draw the flux-barrier side
 rotor.wrib_t = 1*mm; % [m], tangential iron rib width
 
 % you can input flux-barrier angles or let the program compute them
-rotor.barrier_angles_el = [14,26,38]*2; % [deg], electrical flux-barrier angles
+% rotor.barrier_angles_el = [14,26,38]*2; % [deg], electrical flux-barrier angles
 % rotor.barrier_end = 'rect'; % choose 'rect' or comment
 
 % you can define the rib width or comment
-% rotor.wrib = [1,2,4]*mm; % [m], radial iron rib widths
+rotor.wrib = [0,1,1]*mm; % [m], radial iron rib widths
 % You can define the magnet width or comment
 % rotor.wm = [10,20,40]*mm;
 
@@ -41,6 +41,13 @@ hold all
 axis equal
 for bkk = 1:rotor.Nb
   plot(barrier(bkk).X, barrier(bkk).Y, '.-')
+end
+if isfield(rotor,'wm')
+  RM = [barrier(:).Rm];
+  thM = pi/2/rotor.p;
+  Xm = RM.*cos(thM);
+  Ym = RM.*sin(thM);
+  plot(Xm, Ym, 'ko')
 end
 axis auto
 

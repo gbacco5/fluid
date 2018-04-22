@@ -15,6 +15,8 @@ Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 Provide a ready-to-use fully parametric drawing of the
 Synchronous Reluctance Rotor with *fluid* flux-barriers.
 
+The scope of this project is the computation of the flux-barriers points.
+The drawing scripts are for demonstration purposes only.
 
 
 ## Requirements
