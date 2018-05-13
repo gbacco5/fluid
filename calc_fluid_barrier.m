@@ -96,8 +96,12 @@ else
   options.Display = 'off'; % turn off folve display
 end
 options.Algorithm = 'levenberg-marquardt'; % non-square systems
-options.FunctionTolerance = 10*eps;
+options.FunctionTolerance = 1*eps;
+options.TolFun = options.FunctionTolerance;
 options.StepTolerance = 1e4*eps;
+options.TolX = options.StepTolerance;
+% I thought the new Matlab syntax for fsolve was options.FunctionTolerance,
+% I was wrong.
 
 X0 = repmat(te_qAxis,1,2*Nb);
 options = GetFSolveOptions(options);

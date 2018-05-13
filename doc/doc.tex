@@ -100,6 +100,7 @@ w_{\textup{rib}
 
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage[all]{hypcap}
 
 \newcommand{\nonfinito}{\emph{to be continued\ldots}}
 \newcommand{\dirpath}{\texttt}
@@ -388,7 +389,7 @@ need a rotational map:
 \begin{equation}
 \begin{aligned}
 v_x(r,\te) &= v_r \cos\te - v_\te \sin\te \\
-v_\te(r,\te) &= v_r \sin\te + v_\te \cos\te
+v_y(r,\te) &= v_r \sin\te + v_\te \cos\te
 \end{aligned}
 \end{equation}
 
@@ -412,7 +413,7 @@ $ \pt{D}',\pt{D} $.
 \label{fig: flux-barrier base points}
 \end{figure}
 
-Let the flux-barrier and flux-carrier thicknesses be given.
+Let the flux-barrier and flux-carrier thicknesses and widths be given.
 Then the base points for the flux-barriers can be computed easily.
 Let
 $ D\ped{r} $ be the rotor outer diameter,
@@ -538,8 +539,8 @@ y_\pt{C} - r_\pt{C}(\psi_\pt{C}, \te_\pt{C}) \sin\te_\pt{C} = 0 \\
 (x_\pt{O_\pt{C}} - x_\pt{E}) y_\pt{E} -
 (y_\pt{O_\pt{C}} - y_\pt{E}) x_\pt{E} = 0 \\
 %
-(x_\pt{O} - x_\pt{C}) v_x(r_\pt{C},\te_\pt{C}) +
-(y_\pt{O} - y_\pt{C}) v_y(r_\pt{C},\te_\pt{C})
+(x_\pt{O_\pt{C}} - x_\pt{C}) v_x(r_\pt{C},\te_\pt{C}) +
+(y_\pt{O_\pt{C}} - y_\pt{C}) v_y(r_\pt{C},\te_\pt{C}) = 0
 \end{cases}
 \end{equation}
 
