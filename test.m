@@ -14,12 +14,12 @@ if ~exist('test','dir')
 end
 
 %% DATA
-try 
+%try 
 openfemm(1)
 mm = 1e-3; % millimeters
 rotor.De = 200*mm; % [m], rotor outer diameter
 rotor.wrib_t = 1*mm; % [m], tangential iron rib width
-rotor.barrier_end = 'rect'; % choose 'rect' or comment
+%rotor.barrier_end = 'rect'; % choose 'rect' or comment
 
 for p = [1:50] % number of pole pairs
   rotor.p = p;
@@ -57,23 +57,24 @@ for p = [1:50] % number of pole pairs
     end
 
     
-    
+    try 
     %% barrier points computation
     barrier = calc_fluid_barrier(rotor);
-    
+    end 
         
     %% FEMM drawing
     newdocument(0);
-    
+    try 
     draw_fluid_barrier(barrier)
     mi_saveas(['test/Nb_',num2str(Nb),'_p_',num2str(p),'.fem']);
+    end 
     mi_close;
     
   end
 end
 
 closefemm;
-catch
-  disp('FEMM not available.');
-end 
+%catch
+%  disp('FEMM not available.');
+%end 
 toc
