@@ -111,6 +111,12 @@ teB = teAB(Nb+1:end);
 RA = r_map( rho_fluid(psiA, xi_map(teA), rho0) );
 RB = r_map( rho_fluid(psiB, xi_map(teB), rho0) );
 
+% central base points
+xA = real( RA.*exp(1j*teA) );
+yA = imag( RA.*exp(1j*teA) );
+xB = real( RB.*exp(1j*teB) );
+yB = imag( RB.*exp(1j*teB) );
+
 % magnet central base point radius computation
 RAsecond = RA.*cos(te_qAxis - teA);
 RBsecond = RB.*cos(te_qAxis - teB);  
@@ -163,8 +169,17 @@ else
     %   th - xi_fluid((rho_fluid(p*th, psiA', rho0)), psiA', rho0)/p % serve?
     ];
   
-  X0 = [ 1.5*teE', 0.9*xE', 0.9*yE', 0.8*xE', 0.8*yE', 0.25*xE'];
-  % X0 = [ aph_b, 0, 0, 0, 0, 0];
+%   X0 = [ aph_b, 0, 0, 0, 0, 0]; % 1st try
+%   X0 = [ 1.5*teE', 0.9*xE', 0.9*yE', 0.8*xE', 0.8*yE', 0.25*xE']; % 2nd try
+% best try
+  xC0 = ( xE + xCprime + 0.1*xA )/(2 + 0.1);
+  yC0 = ( yE + yCprime )/2;
+  thC0 = atan(yC0./xC0);
+  xOC0 = ( xE + xC0 + 0 )/3;
+  yOC0 = ( yE + yC0 + 0 )/3;
+  RCOCE0 = sqrt( (xOC0 - xE).^2 + (yOC0 - yE).^2 );
+  
+  X0 = [ thC0', xC0', yC0', xOC0', yOC0', RCOCE0'];
   X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
   
   xOC = X(:,4)';
@@ -197,7 +212,16 @@ else
     %   th - xi_fluid((rho_fluid(p*th, psi_d, rho0)), psi_d, rho0)/p % serve?
     ];
   
-  X0 = [ 0.8*teE', 0.8*xE', 0.8*yE', xE'*.9, yE'*.9, xE'*.2];
+%   X0 = [ 0.8*teE', 0.8*xE', 0.8*yE', xE'*.9, yE'*.9, xE'*.2]; % 1st try
+% best try
+  xD0 = ( xE + xDprime )/2;
+  yD0 = ( yE + yDprime )/2;
+  thD0 = atan(yD0./xD0);
+  xOD0 = ( xE + xD0 + xC )/3;
+  yOD0 = ( yE + yD0 + yC )/3;
+  RDODE0 = sqrt( (xOD0 - xE).^2 + (yOD0 - yE).^2 );
+  
+  X0 = [ thD0', xD0', yD0', xOD0', yOD0', RDODE0'];
   X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
   
   xOD = X(:,4)';
@@ -295,9 +319,9 @@ for bkk = 1:Nb
     xOC(bkk) + 1j*yOC(bkk)
     xC(bkk) + 1j*yC(bkk)
     flipud( R_AC.*exp(1j*te_AC) )
-    RA(bkk).*exp(1j*teA(bkk))
+    xA(bkk) + 1j*yA(bkk)
     % bottom side
-    RB(bkk).*exp(1j*teB(bkk))
+    xB(bkk) + 1j*yB(bkk)
     R_BD.*exp(1j*te_BD)
     xD(bkk) + 1j*yD(bkk)
     xOD(bkk) + 1j*yOD(bkk)
@@ -309,6 +333,8 @@ for bkk = 1:Nb
   
   % magnet central base point
   barrier(bkk).Rm = Rmag(bkk)/ScalingFactor;
+  
+  barrier(bkk).barrier_angles_el = barrier_angles_el(bkk);
   
 end
 

@@ -189,14 +189,14 @@ Notice:
 \clearpage
 \section{How to use}
 
-Open the file \lstinline|fluid| and run it.
+Open the file \texttt{fluid} and run it.
 
 Change the machine data in the data section.
 All the variables have a comment next to them.
 
 There are some ``hidden'' options which should be explained.
 \begin{enumerate}
-\item you can provide personal flux barrier angles, or let the program compute 
+\item you can provide personal flux-barrier angles, or let the program compute 
 them as the average of the final points $ \pt{C} $ and $ \pt{D} $ at the rotor 
 periphery.
 This means that you have to always provide the flux-barrier thicknesses and 
@@ -399,7 +399,7 @@ v_y(r,\te) &= v_r \sin\te + v_\te \cos\te
 
 Refer to \autoref{fig: flux-barrier base points} for the points naming scheme.
 Keep in mind that $ \pt{A}' $ is not simply the projection of $ \pt{A} $ onto 
-the $ q $-axis, but it represent the original starting point for the barrier 
+the $ q $-axis, but it represents the original starting point for the barrier 
 sideline, so it lies on the flux-barrier streamline. The same is true for 
 points
 $ \pt{B}',\pt{B} $, 
@@ -432,8 +432,8 @@ and to thickness when it flows in parallel.%
 Then
 \begin{equation}
 \begin{aligned}
-R\ped{r} &= \frac{D\ped{r}}{2} - \wribt \\
-R_\pt{A_1'} &= R\ped{r} - \wc[1] \\
+R\ped{rib} &= \frac{D\ped{r}}{2} - \wribt \\
+R_\pt{A_1'} &= R\ped{rib} - \wc[1] \\
 R_\pt{B_1'} &= R_\pt{A_1'} - \tb[1] \\
     &\:\:\,\vdots
 \end{aligned}
@@ -447,7 +447,7 @@ R_\pt{A_k'} &= R_\pt{B_{k-1}'} - \wc[k] \\
 R_\pt{B_k'} &= R_\pt{A_{k-1}'} - \tb[k]
 \end{aligned}
 \end{equation}
-with the exception $ R_\pt{B_0'} = R\ped{r} $.
+with the exception $ R_\pt{B_0'} = R\ped{rib} $.
 
 Now we know both the radii and the angle -- always $ \pi/(2p) $ -- of the
 flux-barrier internal points. So we can compute their respective streamline
@@ -457,7 +457,7 @@ value.
 
 \subsubsection{Magnet insertion}
 \[
-\wrib[k] = \wrib[k] + \wm[k]
+\wrib[k] \leftarrow \wrib[k] + \wm[k]
 \]
 where $ \wm[k] $ is the \xth{k} magnet width.
 
@@ -546,6 +546,45 @@ y_\pt{C} - r_\pt{C}(\psi_\pt{C}, \te_\pt{C}) \sin\te_\pt{C} = 0 \\
 
 The very same system can be written and solved for point $ \pt{D} $.
 
+
+\subsubsection{Choice of initial position}
+
+For the good convergence of the nonlinear system, we have to choose a proper 
+initial position for the points of interest, namely $ \pt{C} $ and 
+$ \pt{O}_\pt{C} $ for the top part of the flux-barrier.
+
+Since point $ \pt{C} $ should be close to $ \pt{E} $ and $ \pt{C}' $, 
+a good initial guess could be
+\begin{equation}
+x_\pt{C^{(0)}} = \frac{x_\pt{E} + x_{\pt{C}'}}{2} \;,  \qquad
+y_\pt{C^{(0)}} = \frac{y_\pt{E} + y_{\pt{C}'}}{2} 
+\end{equation}
+A slightly better guess shifts the points a bit to the left, in this way:
+\begin{equation}
+x_\pt{C^{(0)}} = \frac{x_\pt{E} + x_{\pt{C}'} + 0.1 x_\pt{A}}{2.1} \;,  \qquad
+y_\pt{C^{(0)}} = \frac{y_\pt{E} + y_{\pt{C}'}}{2} 
+\end{equation}
+
+On the other hand, point $ \pt{O}_\pt{C} $ lies on one edge of the triangle of 
+vertices
+$ \pt{E},\pt{C},\pt{O} $, where $ \pt{O} $ represents the origin and where we 
+are going to use $ \pt{C}^{(0)} $ instead of $ \pt{C} $ because it is still 
+unknown. Then:
+\begin{equation}
+x_\pt{O_\pt{C}}^{(0)} = \frac{x_\pt{E} + x_\pt{C^{(0)}} + 0}{3} \;,  \qquad
+y_\pt{O_\pt{C}}^{(0)} = \frac{y_\pt{E} + y_\pt{C^{(0)}} + 0}{3} 
+\end{equation}
+
+Similar considerations can be made for point $ \pt{D} $, with slight changes:
+\begin{align}
+x_\pt{D^{(0)}} &= \frac{x_\pt{E} + x_{\pt{D}'}}{2} \;,  \qquad
+y_\pt{D^{(0)}} = \frac{y_\pt{E} + y_{\pt{D}'}}{2}  \\[1ex]
+%
+x_\pt{O_\pt{D}}^{(0)} &= \frac{x_\pt{E} + x_\pt{D^{(0)}} + x_\pt{C}}{3} 
+\;, \qquad
+y_\pt{O_\pt{D}}^{(0)} = \frac{y_\pt{E} + y_\pt{D^{(0)}} + x_\pt{C}}{3} 
+\end{align}
+Notice that here we use point $ \pt{C} $ which has already been found.
 
 
 \subsection{Flux-barrier sideline points}

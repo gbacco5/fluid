@@ -59,8 +59,7 @@ for p = [1:50] % number of pole pairs
     
     try 
     %% barrier points computation
-    barrier = calc_fluid_barrier(rotor);
-    end 
+    barrier = calc_fluid_barrier(rotor); 
         
     %% FEMM drawing
     newdocument(0);
@@ -69,6 +68,7 @@ for p = [1:50] % number of pole pairs
     mi_saveas(['test/Nb_',num2str(Nb),'_p_',num2str(p),'.fem']);
     end 
     mi_close;
+    end
     
   end
 end

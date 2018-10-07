@@ -170,8 +170,23 @@ def calc_fluid_barrier(r, deb):
     RA = r_map( rho_fluid(psiA, xi_map(teA), rho0) );
     RB = r_map( rho_fluid(psiB, xi_map(teB), rho0) );
     
+    # central base points
+    zA = RA*np.exp(1j*teA);
+    zB = RB*np.exp(1j*teB);
+    xA = zA.real;
+    yA = zA.imag;
+    xB = zB.real;
+    yB = zB.imag;
+    
+    # magnet central base point radius computation
+    RAsecond = RA*np.cos(te_qAxis - teA);
+    RBsecond = RB*np.cos(te_qAxis - teB);  
+    
+    Rmag = (RAprime + RAsecond + RBprime + RBsecond)/4;
+    
     # 1st test --> OK!
 #    print(RA,teA,RB,teB)
+#    print(xA,yA,xB,yB)
 
     # Outer base points C,D preparation
     RCprime = Dend/2;
@@ -219,7 +234,17 @@ def calc_fluid_barrier(r, deb):
         yOC = yC;
     
     else:      
-        X0 = [ 1.5*teE, 0.9*xE, 0.9*yE, 0.8*xE, 0.8*yE, 0.25*xE];
+        # 1st try
+#        X0 = [ 1.5*teE, 0.9*xE, 0.9*yE, 0.8*xE, 0.8*yE, 0.25*xE];
+        # best try
+        xC0 = ( xE + xCprime + 0.1*xA )/(2 + 0.1);
+        yC0 = ( yE + yCprime )/2;
+        thC0 = np.arctan(yC0/xC0);
+        xOC0 = ( xE + xC0 + 0 )/3;
+        yOC0 = ( yE + yC0 + 0 )/3;
+        RCOCE0 = np.sqrt( (xOC0 - xE)**2 + (yOC0 - yE)**2 );
+        
+        X0 = [ thC0, xC0, yC0, xOC0, yOC0, RCOCE0];
         X0 = np.reshape(X0, Nb*6);
       
         data = (psiA, rho0, xE, yE);
@@ -251,7 +276,17 @@ def calc_fluid_barrier(r, deb):
         yOD = yD;
     
     else:      
-        X0 = [ 0.8*teE, 0.8*xE, 0.8*yE, 0.9*xE, 0.9*yE, 0.2*xE];
+        # 1st try
+#        X0 = [ 0.8*teE, 0.8*xE, 0.8*yE, 0.9*xE, 0.9*yE, 0.2*xE];
+        # best try
+        xD0 = ( xE + xDprime )/2;
+        yD0 = ( yE + yDprime )/2;
+        thD0 = np.arctan(yD0/xD0);
+        xOD0 = ( xE + xD0 + xC )/3;
+        yOD0 = ( yE + yD0 + yC )/3;
+        RDODE0 = np.sqrt( (xOD0 - xE)**2 + (yOD0 - yE)**2 );
+        
+        X0 = [ thD0, xD0, yD0, xOD0, yOD0, RDODE0];
         X0 = np.reshape(X0, Nb*6);
       
         data = (psiB, rho0, xE, yE);
@@ -296,6 +331,7 @@ def calc_fluid_barrier(r, deb):
     
     XX = [];
     YY = [];
+    Rm = [];
     
     for bkk in range(0,Nb):
         dphiAC = np.divide(phiC[bkk] - phiA[bkk], Nstep[bkk]);
@@ -329,9 +365,9 @@ def calc_fluid_barrier(r, deb):
                 xOC[bkk] + 1j*yOC[bkk],
                 xC[bkk] + 1j*yC[bkk] ],
                 np.flipud( np.multiply(R_AC, np.exp(1j*te_AC)) ),
-                [RA[bkk]*np.exp(1j*teA[bkk]),
+                [xA[bkk] + 1j*yA[bkk],
                  # bottom  side
-                 RB[bkk]*np.exp(1j*teB[bkk])],
+                 xB[bkk] + 1j*yB[bkk]],
                 np.multiply( R_BD, np.exp(1j*te_BD) ),                
                 [xD[bkk] + 1j*yD[bkk],
                  xOD[bkk] + 1j*yOD[bkk],
@@ -343,10 +379,14 @@ def calc_fluid_barrier(r, deb):
         
         XX.append([X]);
         YY.append([Y]);
-
+        
+        # magnet central base point
+        Rm.append(Rmag[bkk]/ScalingFactor);
 
     barrier.X = XX;
     barrier.Y = YY;
+    barrier.Rm = Rm;
+
 
 
     if deb == 1:
