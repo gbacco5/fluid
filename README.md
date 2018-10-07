@@ -2,7 +2,7 @@
 
 Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 
-[![DOI](https://zenodo.org/badge/123190369.svg)](https://zenodo.org/badge/latestdoi/123190369)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1214465.svg)](https://doi.org/10.5281/zenodo.1214465)
 
 <img src="doc/gfx/3b.png" width="256">
 

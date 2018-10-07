@@ -17,6 +17,4 @@ doc/doc\.synctex\.gz
 
 doc/doc\.toc
 
-doc/fluid\.bib
-
 __pycache__/fluid_functions\.cpython-36\.pyc
