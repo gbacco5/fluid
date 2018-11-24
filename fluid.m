@@ -20,6 +20,11 @@ rotor.wrib_t = 1*mm; % [m], tangential iron rib width
 
 % you can input flux-barrier angles or let the program compute them
 % rotor.barrier_angles_el = [14,26,38]*2; % [deg], electrical flux-barrier angles
+
+% or you can also input a factor to reach the top or the bottom of each barrier
+% (do not exceed 100%)
+% rotor.barrier_end_wf = [20,50,80]/100; % flux-barrier-end weight factors
+
 % rotor.barrier_end = 'rect'; % choose 'rect' or comment
 
 % you can define the rib width or comment

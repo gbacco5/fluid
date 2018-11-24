@@ -25,6 +25,11 @@ if isfield(r,'barrier_angles_el')
 else
   barrier_angles_el = zeros(1,Nb);
   AutoBarrierEndCalc = 1;
+  if isfield(r,'barrier_end_wf')
+    wf = r.barrier_end_wf;
+  else
+    wf = 0.5*ones(1,Nb);
+  end
 end
 
 if isfield(r,'wm')
@@ -136,7 +141,7 @@ xDprime = Dend/2.*cos(teDprime);
 yDprime = Dend/2.*sin(teDprime);
 
 if AutoBarrierEndCalc
-  teE = (teCprime + teDprime)/2;
+  teE = ( teCprime.*(1 - wf) + teDprime.*wf );
   aphE = pi/2/p - teE;
   barrier_angles = 180/pi*aphE;
   barrier_angles_el = p*barrier_angles;
