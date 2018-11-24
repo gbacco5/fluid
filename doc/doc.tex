@@ -21,6 +21,17 @@
 }
 \input{matlab}
 
+\lstdefinestyle{Python}{
+    language        = Python,
+    basicstyle      = \ttfamily,
+    keywordstyle    = \color{blue},
+    keywordstyle    = [2] \color{teal}, % just to check that it works
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+\usepackage{pythonhighlight}
+
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usetikzlibrary{calc,positioning,shapes.geometric,shapes.symbols,shapes.misc,arrows,math,arrows.meta}
@@ -197,11 +208,21 @@ All the variables have a comment next to them.
 There are some ``hidden'' options which should be explained.
 \begin{enumerate}
 \item you can provide personal flux-barrier angles, or let the program compute 
-them as the average of the final points $ \pt{C} $ and $ \pt{D} $ at the rotor 
-periphery.
+them.
 This means that you have to always provide the flux-barrier thicknesses and 
 flux-carrier widths.
 Optionally, you could also provide the electrical flux-barrier angles.
+\begin{lstlisting}[style=Matlab]
+rotor.barrier_angles_el = [14,26,38]*2;
+\end{lstlisting}
+
+\item if you let the program compute them, they will result the average of the 
+final points $ \pt{C}' $ and $ \pt{D}' $ at the rotor periphery. Alternatively, 
+you can define some weights which determine how close $ \pt{E} $ should be to 
+$ \pt{C}' $ or $ \pt{D}' $.
+\begin{lstlisting}[style=Matlab]
+rotor.barrier_end_wf = [20,50,80]/100;
+\end{lstlisting}
 
 \item by default, the flux-barrier-end is round, so the code solves an 
 additional system to determine the correct locations of the fillet points.
@@ -681,7 +702,7 @@ to be shown in Matlab/Octave.
 
 
 \clearpage
-\section{Code}
+\section{Matlab Code}
 
 \subsection{Main file}
 \lstinputlisting[style=Matlab]{../fluid.m}
@@ -693,6 +714,18 @@ to be shown in Matlab/Octave.
 
 \subsection{Draw fluid barrier}
 \lstinputlisting[style=Matlab]{../draw/draw_fluid_barrier.m}
+
+
+\clearpage
+\section{Python Code}
+
+\subsection{Main file}
+\lstinputpython{../fluid.py}
+\clearpage
+
+\subsection{Fluid functions}
+\lstinputpython{../fluid_functions.py}
+\clearpage
 
 
 

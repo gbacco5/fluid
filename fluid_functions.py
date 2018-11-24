@@ -115,8 +115,12 @@ def calc_fluid_barrier(r, deb):
         barrier_angles_el = r.barrier_angles_el; # [deg], electrical flux-barrier angles
         AutoBarrierEndCalc = 0;
     else:
-        barrier_angles_el =  np.zeros([1,Nb]);
+        barrier_angles_el =  np.zeros(Nb);
         AutoBarrierEndCalc = 1;
+        if hasattr(r,'barrier_end_wf'):
+            wf = r.barrier_end_wf;
+        else:
+            wf = 0.5*np.ones(Nb);
     
     if hasattr(r,'wm'):
         wm = r.wm*ScalingFactor;
@@ -200,7 +204,7 @@ def calc_fluid_barrier(r, deb):
     yDprime = Dend/2*np.sin(teDprime);
 
     if AutoBarrierEndCalc:
-        teE = (teCprime + teDprime)/2;
+        teE = ( teCprime*(1 - wf) + teDprime*wf );
         aphE = pi/2/p - teE;
         barrier_angles = 180/np.pi*aphE;
         barrier_angles_el = p*barrier_angles;
@@ -214,14 +218,6 @@ def calc_fluid_barrier(r, deb):
     # 2nd test --> OK!
 #    print(xE,yE)
     
-
-
-
-
-
-
-
-
 
 
     ## Outer base points C (top)
@@ -321,14 +317,6 @@ def calc_fluid_barrier(r, deb):
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
     XX = [];
     YY = [];
     Rm = [];
@@ -388,7 +376,6 @@ def calc_fluid_barrier(r, deb):
     barrier.Rm = Rm;
 
 
-
     if deb == 1:
         Apt = np.multiply(RA/ScalingFactor, np.exp(1j*teA) );
         Bpt = np.multiply(RB/ScalingFactor, np.exp(1j*teB) );
@@ -405,7 +392,5 @@ def calc_fluid_barrier(r, deb):
         plt.show()
     
         
-    
-    
     
     return barrier
