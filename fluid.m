@@ -1,7 +1,7 @@
 % FLUID
 % Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 %
-% Bacco, Giacomo 2018
+% Bacco, Giacomo (c) 2018, 2026
 
 clear all; close all; clc;
 addpath('draw','tools');
@@ -28,7 +28,7 @@ rotor.wrib_t = 1*mm; % [m], tangential iron rib width
 % rotor.barrier_end = 'rect'; % choose 'rect' or comment
 
 % you can define the rib width or comment
-rotor.wrib = [0,1,1]*mm; % [m], radial iron rib widths
+rotor.wrib = [1,2,4]*mm; % [m], radial iron rib widths
 % You can define the magnet width or comment
 % rotor.wm = [10,20,40]*mm;
 

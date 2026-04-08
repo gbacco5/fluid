@@ -7,6 +7,7 @@ Created on Thu Apr  5 21:49:54 2018
 
 import numpy as np
 import scipy as sp
+from scipy import optimize
 from matplotlib import pyplot as plt
 
 # I define a dummy class for Matlab structure like objects

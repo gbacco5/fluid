@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr  5 21:31:31 2018
+FLUID
+Free Fluid Flux-Barriers Rotor for Synchronous Reluctance Motor Drawing
 
-@author: Giacomo
+Bacco, Giacomo (c) 2018, 2026
 """
 
 from fluid_functions import *
@@ -18,7 +19,7 @@ rotor.De = 200*mm; # [m], rotor outer diameter
 rotor.Nb = 3; # number of flux-barriers
 rotor.tb = np.array([4, 8, 15])*mm; # flux-barrier widths
 rotor.wc = np.array([3, 7, 12, 10])*mm; # flux-carrier widths
-rotor.Nstep = np.array([2, 4, 6]); # number of steps to draw the flux-barrier side
+rotor.Nstep = 3*np.array([2, 4, 6]); # number of steps to draw the flux-barrier side
 rotor.wrib_t = 1*mm; # [m], tangential iron rib width
 
 # you can input flux-barrier angles or let the program compute them
@@ -43,7 +44,7 @@ barrier = calc_fluid_barrier(rotor, deb);
 
 
 ## simple matlab plot
-for bkk in range(0,np.size(barrier.X)):
+for bkk in range(0,len(barrier.X)):
     plt.plot(np.squeeze(barrier.X[bkk]), np.squeeze(barrier.Y[bkk]), '.-')
     
 plt.axis('equal')

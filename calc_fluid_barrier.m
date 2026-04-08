@@ -184,13 +184,13 @@ else
   yOC0 = ( yE + yC0 + 0 )/3;
   RCOCE0 = sqrt( (xOC0 - xE).^2 + (yOC0 - yE).^2 );
   
-  X0 = [ thC0', xC0', yC0', xOC0', yOC0', RCOCE0'];
-  X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
+  X0 = [ thC0, xC0, yC0, xOC0, yOC0, RCOCE0].';
+  X = fsolve( @(x) BarrierEndSystem( x(1:Nb),x(Nb+1:2*Nb),x(2*Nb+1:3*Nb),x(3*Nb+1:4*Nb),x(4*Nb+1:5*Nb),x(5*Nb+1:6*Nb) ), X0, options);
   
-  xOC = X(:,4)';
-  yOC = X(:,5)';
-  xC = X(:,2)';
-  yC = X(:,3)';
+  xOC = X(3*Nb+1:4*Nb).';
+  yOC = X(4*Nb+1:5*Nb).';
+  xC = X(Nb+1:2*Nb).';
+  yC = X(2*Nb+1:3*Nb).';
   RC = hypot(xC, yC);
   teC = atan2(yC, xC);
 end
@@ -226,13 +226,13 @@ else
   yOD0 = ( yE + yD0 + yC )/3;
   RDODE0 = sqrt( (xOD0 - xE).^2 + (yOD0 - yE).^2 );
   
-  X0 = [ thD0', xD0', yD0', xOD0', yOD0', RDODE0'];
-  X = fsolve( @(x) BarrierEndSystem( x(:,1),x(:,2),x(:,3),x(:,4),x(:,5),x(:,6) ), X0, options);
+  X0 = [ thD0, xD0, yD0, xOD0, yOD0, RDODE0].';
+  X = fsolve( @(x) BarrierEndSystem( x(0*Nb+1:1*Nb),x(1*Nb+1:2*Nb),x(2*Nb+1:3*Nb),x(3*Nb+1:4*Nb),x(4*Nb+1:5*Nb),x(5*Nb+1:6*Nb) ), X0, options);
   
-  xOD = X(:,4)';
-  yOD = X(:,5)';
-  xD = X(:,2)';
-  yD = X(:,3)';
+  xOD = X(3*Nb+1:4*Nb);
+  yOD = X(4*Nb+1:5*Nb);
+  xD = X(1*Nb+1:2*Nb);
+  yD = X(2*Nb+1:3*Nb);
   RD = hypot(xD, yD);
   teD = atan2(yD, xD);
 end
@@ -300,14 +300,15 @@ for bkk = 1:Nb
 % 2nd try
 %   X0 = [repmat(rho0*1.1, numel(PhiAC), 1), repmat(xi_map(teE(bkk)), numel(PhiAC), 1)];
 % 3rd try
-  X0 = [linspace(rho0, Dend/2, numel(PhiAC))', linspace(pi/4, xi_map(teE(bkk)), numel(PhiAC))'];
-  RhoXi_AC = fsolve( @(x) PsiPhi( x(:,1),x(:,2), PsiAC, PhiAC, rho0 ), X0, options);
-  RhoXi_BD = fsolve( @(x) PsiPhi( x(:,1),x(:,2), PsiBD, PhiBD, rho0 ), X0, options);
+  X0 = [linspace(rho0, Dend/2, numel(PhiAC)), linspace(pi/4, xi_map(teE(bkk)), numel(PhiAC))]';
+  nX = Nstep(bkk) - 1;
+  RhoXi_AC = fsolve( @(x) PsiPhi( x(0*nX+1:1*nX),x(1*nX+1:2*nX), PsiAC, PhiAC, rho0 ), X0, options);
+  RhoXi_BD = fsolve( @(x) PsiPhi( x(0*nX+1:1*nX),x(1*nX+1:2*nX), PsiBD, PhiBD, rho0 ), X0, options);
   
-  R_AC = r_map(RhoXi_AC(:,1));
-  te_AC = th_map(RhoXi_AC(:,2));
-  R_BD = r_map(RhoXi_BD(:,1));
-  te_BD = th_map(RhoXi_BD(:,2));
+  R_AC = r_map(RhoXi_AC(0*nX+1:1*nX));
+  te_AC = th_map(RhoXi_AC(1*nX+1:2*nX));
+  R_BD = r_map(RhoXi_BD(0*nX+1:1*nX));
+  te_BD = th_map(RhoXi_BD(1*nX+1:2*nX));
   
   if deb
     barrier(bkk).R_AC = R_AC/ScalingFactor;
