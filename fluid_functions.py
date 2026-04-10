@@ -55,8 +55,8 @@ def vy(vr_v,vth_v,th):
 
 def CentralPt_Eq(th, *args):
     psiCentralPt, rho0, mCentral, qCentral = args;
-    return np.multiply( r_map( rho_fluid(psiCentralPt, xi_map(th), rho0) ),
-                 ( np.sin(th) - mCentral*np.cos(th) ) ) - qCentral;
+    return (np.multiply( r_map( rho_fluid(psiCentralPt, xi_map(th), rho0) ),
+                 ( np.sin(th) - mCentral*np.cos(th) ) ) - qCentral).squeeze();
 
 
 def BarrierEndSystem(X, *args):
